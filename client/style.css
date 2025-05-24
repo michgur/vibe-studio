@@ -1,0 +1,54 @@
+:root {
+  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+}
+
+#app {
+  width: 100dvw;
+  min-width: 800px;
+  margin: 0;
+}
+
+button {
+  appearance: none;
+  cursor: pointer;
+  border-radius: 3px;
+  background: #efefef;
+  border: solid 1px #767676;
+}
+
+button:disabled {
+  cursor: default;
+}
+
+button:hover {
+  background: #d6d6d6;
+  border-color: #5d5d5d;
+}
+
+button[rec] {
+  width: 24px;
+  height: 24px;
+  text-align: center;
+  padding: 0;
+}
+
+button[rec^=p] {
+  background: #cce0f5;
+  border: 1px solid #5b9bd5;
+}
+
+button[rec^=p]:hover {
+  background: #b3cce8;
+  border-color: #4a89c2;
+}
