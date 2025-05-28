@@ -6,17 +6,39 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  --color-c: #33c7c2;
+  --color-m: #E97CE2;
+  --color-b: #6868DC;
+  --color-selected: color-mix(in oklch, var(--color-b), white 93%);
+  --color-hover: color-mix(in oklch, var(--color-b), white 97%);
+  --shadow-sm: 0 2px 4px -1px #48486122;
+  --shadow-lg: 0 10px 8px -3px #48486133;
+  --color-10: #EEEEFF;
+  --color-8: #CDCDEE;
+  --color-6: #ADADDB;
+  --color-4: #7D7DA6;
+  --color-2: #4F4F64;
+  --color-0: #131316;
+}
+
+* {
+  box-sizing: border-box;
+  letter-spacing: -0.03em;
 }
 
 body {
   margin: 0;
-  min-height: 100vh;
+  width: 100dvw;
+  height: 100vh;
+  color: var(--color-0);
+  background: #FAFAFF;
 }
 
 #app {
-  width: 100dvw;
+  padding: 5px;
   min-width: 800px;
   margin: 0;
+  height: 100%;
 }
 
 button {
@@ -36,19 +58,114 @@ button:hover {
   border-color: #5d5d5d;
 }
 
-button[rec] {
-  width: 24px;
-  height: 24px;
-  text-align: center;
-  padding: 0;
+h4 {
+  color: var(--color-2);
 }
 
-button[rec^=p] {
-  background: #cce0f5;
-  border: 1px solid #5b9bd5;
+small {
+  color: var(--color-4);
 }
 
-button[rec^=p]:hover {
-  background: #b3cce8;
-  border-color: #4a89c2;
+.card {
+  border: var(--color-8) 1px solid;
+  border-radius: 8px;
+  background: white;
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+
+  & .card-header {
+    background: var(--color-10);
+    border: 1px solid var(--color-8);
+    padding: 8px;
+    margin: -1px;
+    margin-bottom: 0;
+  }
+
+  & .card-footer {
+    background: var(--color-10);
+    border: 1px solid var(--color-8);
+    padding: 8px;
+    margin: -1px;
+    margin-top: 0;
+  }
+}
+
+.monospace {
+  font-family: monospace;
+}
+
+.tooltip {
+  position: fixed;
+  transform: translateX(-50%);
+  pointer-events: none;
+  z-index: 1000;
+
+  background: #000;
+  color: #fff;
+  font-size: .75rem;
+  font-weight: 500;
+  line-height: 1;
+  padding: 4px 8px;
+  border-radius: 4px;
+  white-space: nowrap;
+
+  opacity: 0;
+  transition: opacity .1s;
+}
+
+.tooltip.show {
+  opacity: 1;
+}
+
+.skeleton {
+  position: relative;
+  pointer-events: none;
+}
+
+.skeleton::before,
+.skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+}
+
+.skeleton::before {
+  background: white;
+}
+
+.skeleton::after {
+  background:
+    linear-gradient(90deg,
+      transparent 0,
+      #EEEEFF88 50%,
+      transparent 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.2s infinite;
+}
+
+@keyframes skeleton-shimmer {
+  from {
+    background-position: 200% 0
+  }
+
+  to {
+    background-position: -200% 0
+  }
+}
+
+.ellipsize {
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.line-clamp {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--lines, 1);
+  line-clamp: var(--lines, 1);
+  text-overflow: ellipsis;
+  overflow: hidden;
+  max-height: 1.3em * var(--lines, 1);
 }

@@ -2,33 +2,28 @@
 import type { Contact } from "../../shared/types"
 import { ref, watch } from "vue"
 import QuickPlay from "./QuickPlay.vue"
-import CallLog from "./CallLog.vue"
 import Pagination from "./Pagination.vue"
-import ContactStatusFilter from "./ContactStatusFilter.vue"
+import ContactStatusFilter, { type ContactStatus } from "./ContactStatusFilter.vue"
+import CallDirectionIcon from "./CallDirectionIcon.vue"
+import { fmtDate, fmtName } from "../fmt"
 
 const props = defineProps<{ agent: string }>()
 
-const statusFilter = ref<string[]>([])
+const statusFilter = ref<ContactStatus[]>([])
 const contacts = ref<Contact[]>([])
 const totalContacts = ref<number | undefined>(undefined)
 const totalPages = ref<number | undefined>(undefined)
 const currentPage = ref(1)
 const isLoading = ref(true)
+const isHorizontallyScrolled = ref(false)
 const errorShown = ref<string | undefined>(undefined)
-const selectedContact = ref<Contact | undefined>(undefined)
-
-const formatDate = (d?: string) => {
-  if (!d) return 'N/A'
-  try {
-    const date = new Date(d)
-    return `${date.getDate()} ${date.toLocaleDateString('en-US', { month: 'short' })} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}`
-  } catch {
-    return d
-  }
-}
-const lastRecId = (c: Contact) => (c.calls.find((a) => a.twilio_sid)?.twilio_sid)
+const selectedContact = defineModel<Contact | undefined>("contact")
 
 async function fetchContacts() {
+  selectedContact.value = undefined;
+  contacts.value = []
+  isLoading.value = true
+
   const query = new URLSearchParams()
   query.set('page', currentPage.value.toString())
   for (const status of statusFilter.value) {
@@ -36,7 +31,6 @@ async function fetchContacts() {
   }
 
   try {
-    isLoading.value = true
     const res = await fetch(`/api/${props.agent}/contacts?` + query.toString(), {
       method: 'GET'
     }).then(r => r.json())
@@ -53,142 +47,187 @@ async function fetchContacts() {
   }
 }
 
-watch(() => [props.agent, currentPage.value, statusFilter.value], fetchContacts, { immediate: true })
+watch(() => [props.agent, currentPage.value, statusFilter.value], fetchContacts)
 
 const onPrev = () => (currentPage.value = Math.max(1, currentPage.value - 1))
 const onNext = () => (currentPage.value = Math.min(totalPages.value || 0, currentPage.value + 1))
-const onContactRowClick = (contact: Contact) => {
-  selectedContact.value = contact
-}
-const onFilterChange = (f: string[]) => {
-  statusFilter.value = f
-}
+const lastRecId = (c: Contact) => (c.calls.find((a) => a.recordingId)?.recordingId)
 </script>
 
 <template>
-  <section id="contact-list">
-    <h2>Contact List for Agent: {{ agent }}</h2>
+  <section id="contact-list" class="card">
+    <div>
+      <ContactStatusFilter v-model="statusFilter" />
+      <div v-if="selectedContact" class="sidepanel-icon" @click="selectedContact = undefined"
+        v-tooltip="'Hide Call Log'">
+      </div>
+    </div>
 
-    <ContactStatusFilter @change="onFilterChange" />
-
-    <p>Total Contacts: {{ totalContacts || 'N/A' }}</p>
-
-    <Pagination v-if="totalPages" :page="currentPage" :pages="totalPages" :loading="isLoading" @prev="onPrev"
-      @next="onNext" />
-
-    <p v-if="isLoading && !contacts.length">
-      Loading contacts for agent {{ agent }}...
+    <p v-if="errorShown">Error fetching contacts: {{ errorShown }}</p>
+    <div v-else-if="isLoading" class="skeleton" style="flex-grow:1"></div>
+    <p v-else-if="!contacts.length" style="flex-grow:1;padding-inline:8px">
+      No contacts found.
     </p>
-    <p v-else-if="errorShown">Error fetching contacts: {{ errorShown }}</p>
-    <p v-else-if="!contacts.length && totalContacts">
-      No contacts found for this page.
-    </p>
-    <p v-else-if="!contacts.length && !totalContacts">
-      No contacts found for agent {{ agent }}.
-    </p>
-
-    <figure v-if="contacts.length">
-      <table>
+    <figure v-else :class="isHorizontallyScrolled && 'scrolled'"
+      @scroll="(e) => isHorizontallyScrolled = ((e.target as HTMLElement).scrollLeft !== 0)">
+      <table id="contact-table">
         <thead>
           <tr>
             <th>Name</th>
             <th>Status</th>
+            <th>Calls</th>
             <th>Phone</th>
+            <th>Next Call</th>
             <th>Last Call</th>
-            <th>Scheduled</th>
-            <th>Retries</th>
-            <th>Quick Play</th>
+            <th>🎧</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="c in contacts" :key="c.id" data-is-contact-row="true" @click="onContactRowClick(c)"
-            :class="{ selected: selectedContact === c }">
-            <td :title="(c.first_name + ' ' + c.last_name) || 'Unnamed Contact'">
-              <strong>{{ (c.first_name + ' ' + c.last_name) || 'Unnamed Contact' }}</strong>
-            </td>
+        <tbody :class="isLoading && 'skeleton'">
+          <tr v-for="c in contacts" :key="c.id" @click="selectedContact = c"
+            :class="{ selected: selectedContact?.id === c.id }">
+            <th :title="fmtName(c.firstName, c.lastName)" class="ellipsize">
+              {{ fmtName(c.firstName, c.lastName) }}
+            </th>
             <td>{{ c.status }}</td>
+            <td>{{ c.retryCount }} / {{ c.retryLimit }}</td>
             <td>{{ c.phone }}</td>
-            <td>{{ c.calls ? formatDate(c.calls.at(-1)?.time) : '' }}</td>
-            <td>{{ formatDate(c.scheduled_time) }}</td>
-            <td>{{ c.retry_count }} / {{ c.retry_limit }}</td>
+            <td><small>{{ fmtDate(c.scheduledAt) }}</small></td>
+            <td>
+              <CallDirectionIcon v-if="c.calls.length" :direction="c.calls.at(0)?.direction!" />
+              <small>{{ fmtDate(c.calls?.at(0)?.dialedAt) }}</small>
+            </td>
             <td>
               <QuickPlay v-if="lastRecId(c)" :recId="lastRecId(c)!" />
-              <span v-else>N/A</span>
             </td>
           </tr>
         </tbody>
       </table>
     </figure>
-
-    <CallLog v-if="selectedContact" :contact="selectedContact" :agent="props.agent"
-      @closePane="selectedContact = undefined" />
-
-    <Pagination v-if="totalPages" :page="currentPage" :pages="totalPages" :loading="isLoading" @prev="onPrev"
-      @next="onNext" />
+    <div class="card-footer">
+      <Pagination v-if="totalPages" :page="currentPage" :items="totalContacts" :pages="totalPages" :loading="isLoading"
+        @prev="onPrev" @next="onNext" />
+      <small v-if="totalContacts">Showing {{ contacts.length }} / {{ totalContacts }} Contacts</small>
+    </div>
   </section>
 </template>
 
 <style>
 #contact-list {
+  display: flex;
+  flex-direction: column;
   position: relative;
 
   & figure {
     overflow-x: auto;
     margin: 0;
+    flex-grow: 1;
+
+    &.scrolled th:first-child::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      left: auto;
+      width: 1px;
+      background: var(--color-10);
+    }
   }
 
-  & table {
+  & table#contact-table {
     width: 100%;
     min-width: 900px;
     border-collapse: collapse;
-    margin-top: 10px;
+    overflow: auto;
+
+    & thead {
+      position: sticky;
+      z-index: 1;
+      top: 0;
+      box-shadow: var(--shadow-sm), 0 1px 0 var(--color-10);
+      color: var(--color-4);
+
+      & tr {
+        background: white;
+      }
+
+      & th {
+        padding: 12px 8px;
+        white-space: nowrap;
+        text-align: center;
+      }
+    }
+
+    & td:first-child,
+    & th:first-child {
+      text-align: start;
+      position: sticky;
+      left: 0;
+      background: inherit;
+    }
+
+    & tbody {
+
+      & td,
+      & th {
+        border-bottom: 1px solid var(--color-10);
+        padding: 10px 8px;
+        font-size: 0.9em;
+        white-space: nowrap;
+        cursor: pointer;
+        text-align: center;
+
+        &:has(button) {
+          cursor: default;
+        }
+      }
+
+      & tr {
+        background: white;
+
+        &:hover {
+          background: var(--color-hover);
+        }
+
+        &.selected {
+          background: var(--color-selected);
+        }
+      }
+    }
   }
 
-  & thead th {
-    border-bottom: 2px solid #ddd;
-    padding: 12px 8px;
-    background: #f7f7f7;
-    white-space: nowrap;
-    text-align: center;
+  &>:last-child {
+    display: flex;
+    align-items: stretch;
+    flex-direction: column;
+    gap: 8px;
+  }
+}
+
+.sidepanel-icon {
+  width: 18px;
+  padding: 1px;
+  aspect-ratio: 1;
+  background: var(--color-8);
+  border-radius: 2px;
+  cursor: pointer;
+  vertical-align: text-top;
+  position: absolute;
+  right: 8px;
+  top: 8px;
+
+  &:hover {
+    background: var(--color-6);
   }
 
-  & thead th:first-child {
-    text-align: start;
-    min-width: 180px;
+  &::before {
+    content: "";
+    display: block;
+    height: 100%;
+    width: 70%;
+    background: white;
   }
 
-  & tbody td {
-    border-bottom: 1px solid #eee;
-    padding: 10px 8px;
-    font-size: 0.9em;
-    white-space: nowrap;
-    cursor: pointer;
-    text-align: center;
-  }
-
-  & tbody td:last-child {
-    cursor: default;
-  }
-
-  & tbody tr.selected {
-    background: #f0f8ff;
-  }
-
-  & tbody td:first-child {
-    text-align: start;
-  }
-
-  & tbody td:first-child strong {
-    display: inline-block;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  & tbody td:last-child span {
-    font-size: 0.9em;
-    color: #aaa;
+  &:hover::before {
+    background: var(--color-10);
   }
 }
 </style>

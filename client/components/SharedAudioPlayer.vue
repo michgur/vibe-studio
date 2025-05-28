@@ -1,24 +1,24 @@
 <template>
-  <div :style="{ ...playerStyle, ...(!globalAudio.currentRecId && { display: 'none' } || {}) }"
-    data-is-audio-player="true">
+  <div id="rec-player" class="card" v-show="globalAudio.currentRecId">
     <audio ref="audioRef" preload="metadata" />
 
     <p v-if="errorShown" style="color: red">Error: {{ errorShown }}</p>
 
-    <div :style="controlRowStyle">
-      <QuickPlay :recId="globalAudio.currentRecId" />
-      <input type="range" :max="Math.floor(duration)" v-model.number="currentTime" @input="onSeek" :style="sliderStyle"
+    <div>
+      <input type="range" :max="Math.floor(duration)" v-model="currentTime" @input="onSeek"
         :disabled="globalAudio.isLoading || !!errorShown || !duration" />
-      <span>{{ fmt(currentTime) }} / {{ fmt(duration) }}</span>
-      <button @click="onClose" title="Close Player">✕</button>
+      <button @click="onClose" v-tooltip="'Close Player'">✕</button>
     </div>
 
-    <div :style="controlRowStyle">
-      <label for="rate">Speed:</label>
-      <select id="rate" v-model.number="playbackRate" @change="onRateChanged" :style="selectStyle"
-        :disabled="globalAudio.isLoading || !!errorShown">
-        <option v-for="r in rates" :key="r" :value="r">{{ r }}x</option>
-      </select>
+    <div>
+      <div>
+        <QuickPlay :recId="globalAudio.currentRecId" />
+        <select v-tooltip="'Audio Speed'" v-model="playbackRate" @change="onRateChanged"
+          :disabled="globalAudio.isLoading || !!errorShown">
+          <option v-for="r in rates" :key="r" :value="r">{{ r }}x</option>
+        </select>
+      </div>
+      <small>{{ fmtTimestamp(currentTime) }} / {{ fmtTimestamp(duration) }}</small>
     </div>
   </div>
 </template>
@@ -27,6 +27,7 @@
 import { ref, watch, nextTick, onUnmounted } from 'vue'
 import globalAudio from '../state/globalAudio'
 import QuickPlay from './QuickPlay.vue';
+import { fmtTimestamp } from '../fmt';
 
 const props = defineProps<{ agent?: string }>()
 
@@ -37,11 +38,6 @@ const errorShown = ref<string | null>(null)
 const playbackRate = ref(1)
 
 const rates = [1, 1.25, 1.5, 2]
-const fmt = (t: number) => {
-  const m = Math.floor(t / 60)
-  const s = String(Math.floor(t % 60)).padStart(2, '0')
-  return `${m}:${s}`
-}
 
 function onPlayPause() {
   const a = audioRef.value
@@ -123,27 +119,47 @@ watch(
   { immediate: true }
 )
 onUnmounted(() => detach?.())
-
-
-/* ---------- inline styles ---------- */
-const playerStyle = {
-  position: 'fixed',
-  bottom: '20px',
-  left: '50%',
-  transform: 'translateX(-50%)',
-  width: '90%',
-  maxWidth: '600px',
-  padding: '15px',
-  backgroundColor: '#f0f0f0',
-  border: '1px solid #ccc',
-  borderRadius: '8px',
-  boxShadow: '0 4px 8px rgba(0,0,0,0.1)',
-  zIndex: 1000,
-  display: 'flex',
-  flexDirection: 'column',
-  gap: '10px'
-}
-const controlRowStyle = { display: 'flex', alignItems: 'center', gap: '10px' }
-const sliderStyle = { flexGrow: 1 }
-const selectStyle = { padding: '8px', borderRadius: '4px' }
 </script>
+<style>
+#rec-player {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 90%;
+  max-width: 600px;
+  padding: 8px;
+  background-color: var(--color-selected);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  & input[type=range] {
+    flex-grow: 1;
+    accent-color: var(--color-b);
+  }
+
+  & select {
+    height: 24px;
+    padding: 0;
+    appearance: none;
+    text-align: center;
+    font-weight: 600;
+    background: none;
+    border: none;
+    cursor: pointer;
+
+    & option {
+      padding: 0;
+    }
+  }
+
+  & div {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+}
+</style>

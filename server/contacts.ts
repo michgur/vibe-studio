@@ -13,36 +13,38 @@ function parseCallMetadata(raw: any): CallMetadata {
   const match = raw.recording_url?.match(/\/Recordings\/([^/.]+)/)
   return {
     id: raw.chat_id,
-    time: raw.start_time,
+    dialedAt: raw.start_time,
     duration: (raw.call_duration_seconds || 0) + (raw.merged_call_duration_seconds || 0),
-    metadata: raw.metadata || {},
-    recording_url: match ? `/recording/${match[1]}.wav` : undefined,
+    metadata: raw.result_metadata || {},
     direction: raw.call_direction || 'outgoing',
     result: (raw.result || '').replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
-    from_number: raw.from_number,
-    attempt_num: raw.attempt_num || 0,
-    twilio_sid: (match && match[1]) || undefined,
+    fromPhone: raw.from_number,
+    attempt: raw.attempt_num || 0,
+    recordingId: (match && match[1]) || undefined,
+    timezone: raw.timezone_name || raw.result_metadata?.timezone_name,
   }
 }
 
 function parseContact(raw: any): Contact {
   raw.metadata ??= {}
+  const calls: CallMetadata[] = (raw.call_attempts_log || [])
+    .map(parseCallMetadata)
+    .sort((a: CallMetadata, b: CallMetadata) => (+new Date(b.dialedAt!)) - (+new Date(a.dialedAt!)))
+
   return {
-    json_str: JSON.stringify(raw, null, 4),
+    rawJsonStr: JSON.stringify(raw, null, 4),
     status: (raw.contact_state || '').replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
     metadata: raw.metadata,
-    first_name: raw.metadata.contact_name || '',
-    last_name: raw.metadata.contact_last_name || '',
+    firstName: raw.metadata.contact_name || '',
+    lastName: raw.metadata.contact_last_name || '',
     phone: raw.phone_number || '',
     id: raw.contact_id,
-    timezone_offset: raw.timezone_offset || 0,
-    retry_limit: raw.retry_limit || 0,
-    retry_count: raw.retry_count || 0,
-    queue_time: raw.queue_time,
-    scheduled_time: raw.scheduled_time,
-    calls: (raw.call_attempts_log || [])
-      .map(parseCallMetadata)
-      .sort((a: CallMetadata, b: CallMetadata) => (+new Date(b.time!)) - (+new Date(a.time!))),
+    timezone: raw.timezone_name || raw.metadata?.timezone_name || calls.find(c => c.timezone)?.timezone,
+    retryLimit: raw.retry_limit || 0,
+    retryCount: raw.retry_count || 0,
+    queuedAt: raw.queue_time,
+    scheduledAt: raw.scheduled_time,
+    calls,
   }
 }
 
@@ -64,16 +66,27 @@ router.get('/:agent/contacts', async (req: Request, res: Response, next: NextFun
   }
 })
 
-router.get('/:agent/calls/:id', async (req, res, next) => {
+router.get('/:agent/contacts/:id', async (req, res, next) => {
   try {
     const { agent, id } = req.params
-    const cached = cache.get([agent, id])
-    if (cached) {
-      res.json(cached)
-      return
+
+    let contact = cache.get([agent, id])
+    if (!contact) {
+      const resp = await oneaiRequest('GET', agent, `contacts/${id}`)
+      contact = parseContact(resp)
+      cache.set([agent, id], contact)
     }
 
-    const raw = await oneaiRequest('GET', agent, `contacts/${id}`)
+    res.json(contact)
+  } catch (err) {
+    next(err)
+  }
+})
+
+router.get('/:agent/calls/:id/contact', async (req, res, next) => {
+  try {
+    const { agent, id } = req.params
+    const raw = await oneaiRequest('GET', agent, `contacts/by_chat_id/${id}`)
     const contact = parseContact(raw)
     cache.set([agent, contact.id], contact)
     res.json(contact)

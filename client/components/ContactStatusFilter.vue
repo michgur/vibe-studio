@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div id="contact-status" class="card-header">
     <label for="state-filter" style="margin-inline-end: 10px">Filter by status:</label>
     <select id="state-filter" v-model="selectedFilterLabel">
       <option v-for="opt in FILTER_OPTIONS" :key="opt.label" :value="opt.label">
@@ -8,34 +8,20 @@
     </select>
   </div>
 
-  <div v-if="selectedFilter.status === 'custom'" id="custom-status">
-    <p>Select custom status:</p>
-    <div>
-      <label v-for="st in ALL_CONTACT_STATES" :key="st">
-        <input type="checkbox" :value="st" v-model="customSelectedStatus" />
-        {{ prettify(st) }}
-      </label>
-    </div>
+  <div v-if="selectedFilter.status === 'custom'" id="custom-status" class="card-header">
+    <label v-for="st in ALL_CONTACT_STATES" :key="st">
+      <input type="checkbox" :value="st" v-model="customSelectedStatus" />
+      {{ prettify(st) }}
+    </label>
   </div>
 </template>
 
 <style>
 #custom-status {
-  margin: 10px 0;
-  padding: 10px;
-  border: 1px solid #eee;
-
-  &> :first-child {
-    margin-top: 0;
-    margin-bottom: 8px;
-    font-weight: bold;
-  }
-
-  &>div {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
-    gap: 8px 10px;
-  }
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+  gap: 8px 10px;
+  margin-bottom: 0;
 
   & label {
     display: flex;
@@ -49,9 +35,7 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue"
 
-const emit = defineEmits<{
-  (e: 'change', value: ContactStatus[]): void
-}>()
+const model = defineModel<ContactStatus[]>()
 
 const ALL_CONTACT_STATES = [
   'new',
@@ -67,7 +51,7 @@ const ALL_CONTACT_STATES = [
   'dont_call',
   'dnc_blocked'
 ] as const
-type ContactStatus = typeof ALL_CONTACT_STATES[number]
+export type ContactStatus = typeof ALL_CONTACT_STATES[number]
 
 interface FilterOption {
   label: string
@@ -106,6 +90,6 @@ const filter = computed(() =>
       : selectedFilter.value.status
 )
 watch(filter, (f) => {
-  emit("change", f)
+  model.value = f
 }, { immediate: true })
 </script>
