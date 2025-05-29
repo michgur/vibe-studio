@@ -79,7 +79,7 @@ const lastRecId = (c: Contact) => (c.calls.find((a) => a.recordingId)?.recording
             <th>Phone</th>
             <th>Next Call</th>
             <th>Last Call</th>
-            <th>🎧</th>
+            <th v-tooltip="'Quick Listen'">🎧</th>
           </tr>
         </thead>
         <tbody :class="isLoading && 'skeleton'">
@@ -103,9 +103,9 @@ const lastRecId = (c: Contact) => (c.calls.find((a) => a.recordingId)?.recording
         </tbody>
       </table>
     </figure>
-    <div class="card-footer">
-      <Pagination v-if="totalPages" :page="currentPage" :items="totalContacts" :pages="totalPages" :loading="isLoading"
-        @prev="onPrev" @next="onNext" />
+    <div class="card-footer" v-if="totalPages">
+      <Pagination :page="currentPage" :items="totalContacts" :pages="totalPages" :loading="isLoading" @prev="onPrev"
+        @next="onNext" />
       <small v-if="totalContacts">Showing {{ contacts.length }} / {{ totalContacts }} Contacts</small>
     </div>
   </section>

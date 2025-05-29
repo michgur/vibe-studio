@@ -23,7 +23,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch, defineModel } from 'vue'
+import { watch } from 'vue'
 import QuickPlay from './QuickPlay.vue'
 import type { Contact, CallMetadata } from '../../shared/types'
 import CallDetails from './CallDetails.vue'

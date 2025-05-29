@@ -5,7 +5,7 @@
       :disabled="!call.duration">Transcript</button>
   </div>
 
-  <div id="call-details">
+  <div id="call-details" ref="callDetails">
     <template v-if="tab === 'details'">
       <table>
         <tbody>
@@ -43,7 +43,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch } from 'vue'
+import { ref, computed, watch, useTemplateRef } from 'vue'
 import type { Contact, CallMetadata, CallMessage } from '../../shared/types'
 import { fmtKey, fmtTimestamp, fmtValue } from '../fmt';
 
@@ -53,6 +53,7 @@ const transcript = ref<CallMessage[] | null>(null)
 const isLoading = ref(false)
 const errorShown = ref<string | null>(null)
 const tab = ref<'details' | 'transcript'>('details')
+const callDetails = useTemplateRef("callDetails")
 
 async function fetchTranscript(): Promise<CallMessage[]> {
   try {
@@ -83,6 +84,10 @@ watch(() => props.call, async (call) => {
 }, { immediate: true })
 
 const detailRows = computed(() => Object.entries(props.call || {}).filter(([k]) => !['metadata', 'recording_url', 'attempt_num', 'chat_id', 'start_time', 'result', 'call_direction'].includes(k)))
+
+watch(() => [tab.value, props.call], () => {
+  callDetails.value?.scrollTo({ top: 0, left: 0 })
+})
 </script>
 
 <style>

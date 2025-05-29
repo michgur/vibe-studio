@@ -19,7 +19,7 @@
 </style>
 
 <script setup lang="ts">
-import { defineProps, computed } from 'vue';
+import { computed } from 'vue';
 const props = defineProps<{ direction: string }>()
 const isIncoming = computed(() => props.direction === "incoming")
 </script>
