@@ -11,7 +11,6 @@ import { watch, onUnmounted, useTemplateRef } from 'vue'
 const { minWidth = 0.2, open = true } = defineProps<{ minWidth?: number, open?: boolean }>()
 const pane = useTemplateRef("pane")
 let left: HTMLElement | undefined = undefined
-let prevWidth = 0
 
 function start(_: MouseEvent) {
   window.addEventListener('mousemove', drag)
