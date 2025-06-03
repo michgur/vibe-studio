@@ -1,13 +1,14 @@
 <script setup lang="ts">
-import type { Contact } from "../../shared/types"
 import { ref, watch } from "vue"
-import QuickPlay from "./QuickPlay.vue"
-import Pagination from "./Pagination.vue"
+import type { Contact, DateRange } from "@shared/types"
+import PlayButton from "@/components/recordings/PlayButton.vue"
+import Pagination from "@/components/ui/Pagination.vue"
 import ContactStatusFilter, { type ContactStatus } from "./ContactStatusFilter.vue"
-import CallDirectionIcon from "./CallDirectionIcon.vue"
-import { fmtDate, fmtName } from "../fmt"
+import CallDirectionIcon from "@/components/calls/CallDirectionIcon.vue"
+import { fmtDate, fmtName } from "@/fmt"
+import globalAudio from "@/state/globalAudio"
 
-const props = defineProps<{ agent: string }>()
+const props = defineProps<{ agent: string, dateRange: DateRange }>()
 
 const statusFilter = ref<ContactStatus[]>([])
 const contacts = ref<Contact[]>([])
@@ -19,12 +20,38 @@ const isHorizontallyScrolled = ref(false)
 const errorShown = ref<string | undefined>(undefined)
 const selectedContact = defineModel<Contact | undefined>("contact")
 
+function selectNextContact(offset: number) {
+  if (selectedContact.value) {
+    const idx = contacts.value.findIndex(c => c.id === selectedContact.value?.id)
+    if ((offset < 0 && idx >= -offset) || (offset >= 0 && idx < contacts.value.length - offset)) {
+      selectedContact.value = contacts.value[idx + offset]
+    }
+  }
+}
+
+function playSelectedRecording() {
+  if (selectedContact.value) {
+    const recId = lastRecId(selectedContact.value)
+    if (globalAudio.currentRecId !== recId) {
+      globalAudio.currentRecId = recId
+      globalAudio.isPlaying = true
+    } else {
+      globalAudio.isPlaying = !globalAudio.isPlaying
+    }
+  }
+}
+
 async function fetchContacts() {
   selectedContact.value = undefined;
   contacts.value = []
   isLoading.value = true
+  isHorizontallyScrolled.value = false
 
   const query = new URLSearchParams()
+  if (props.dateRange) {
+    query.set('from', props.dateRange[0])
+    query.set('to', props.dateRange[1])
+  }
   query.set('page', currentPage.value.toString())
   for (const status of statusFilter.value) {
     query.append('status', status)
@@ -47,7 +74,7 @@ async function fetchContacts() {
   }
 }
 
-watch(() => [props.agent, currentPage.value, statusFilter.value], fetchContacts)
+watch(() => [props.agent, props.dateRange, currentPage.value, statusFilter.value], fetchContacts)
 
 const onPrev = () => (currentPage.value = Math.max(1, currentPage.value - 1))
 const onNext = () => (currentPage.value = Math.min(totalPages.value || 0, currentPage.value + 1))
@@ -55,7 +82,8 @@ const lastRecId = (c: Contact) => (c.calls.find((a) => a.recordingId)?.recording
 </script>
 
 <template>
-  <section id="contact-list" class="card">
+  <section id="contact-list" class="card" tabindex="0" @keydown.up="selectNextContact(-1)"
+    @keydown.down="selectNextContact(1)" @keydown.space="playSelectedRecording">
     <div>
       <ContactStatusFilter v-model="statusFilter" />
       <div v-if="selectedContact" class="sidepanel-icon" @click="selectedContact = undefined"
@@ -68,7 +96,7 @@ const lastRecId = (c: Contact) => (c.calls.find((a) => a.recordingId)?.recording
     <p v-else-if="!contacts.length" style="flex-grow:1;padding-inline:8px">
       No contacts found.
     </p>
-    <figure v-else :class="isHorizontallyScrolled && 'scrolled'"
+    <figure v-else :class="{ scrolled: isHorizontallyScrolled }"
       @scroll="(e) => isHorizontallyScrolled = ((e.target as HTMLElement).scrollLeft !== 0)">
       <table id="contact-table">
         <thead>
@@ -97,7 +125,7 @@ const lastRecId = (c: Contact) => (c.calls.find((a) => a.recordingId)?.recording
               <small>{{ fmtDate(c.calls?.at(0)?.dialedAt) }}</small>
             </td>
             <td>
-              <QuickPlay v-if="lastRecId(c)" :recId="lastRecId(c)!" />
+              <PlayButton v-if="lastRecId(c)" :recId="lastRecId(c)!" />
             </td>
           </tr>
         </tbody>

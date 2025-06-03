@@ -1,20 +1,26 @@
 import { createApp } from 'vue'
-import './style.css'
-import App from './App.vue'
-import Layout from './Layout.vue'
-import { vTooltip } from './tooltip'
 import { createWebHistory, createRouter, type RouteRecordRaw } from 'vue-router'
-import ContactsPage from './components/ContactsPage.vue'
-import CallPage from './components/CallPage.vue'
+
+import '@/style.css'
+import App from '@/App.vue'
+import Layout from '@/Layout.vue'
+import { vTooltip } from '@/directives/tooltip'
+import ContactsPage from '@/pages/ContactsPage.vue'
+import CallPage from '@/pages/CallPage.vue'
+import ReportBuilderPage from '@/pages/ReportBuilderPage.vue'
+import { ALL_AGENTS } from '@shared/agents'
 
 const routes: RouteRecordRaw[] = [
+  { path: '/', redirect: `/${ALL_AGENTS[0]}` },
   {
     path: '/:agent',
     component: Layout,
     props: true,
     children: [
-      { path: '', component: ContactsPage },
-      { path: 'call', component: CallPage },
+      { path: '', redirect: to => `${to.params.agent}/contacts` },
+      { path: 'contacts', component: ContactsPage },
+      { path: 'calls', component: CallPage },
+      { path: 'reports', component: ReportBuilderPage },
     ]
   },
 ]

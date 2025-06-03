@@ -1,8 +1,8 @@
 <template>
-  <div v-show="open" class="resizable-pane" ref="pane">
+  <aside v-show="open" class="resizable-pane" ref="pane">
     <div @mousedown="start" />
     <slot />
-  </div>
+  </aside>
 </template>
 
 <script setup lang="ts">

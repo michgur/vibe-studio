@@ -8,14 +8,14 @@ import 'monaco-editor/min/vs/editor/editor.main.css' // theme CSS
 import { watch, onMounted, onBeforeUnmount, useTemplateRef } from 'vue';
 
 const el = useTemplateRef("el")
-const { data } = defineProps<{ data: any }>()
+const { content } = defineProps<{ content: any }>()
 
 let editor: monaco.editor.IStandaloneCodeEditor | null = null
 
-watch(() => data, () => { if (editor) editor.setValue(data) })
+watch(() => content, () => { if (editor) editor.setValue(content) })
 onMounted(() => {
   editor = monaco.editor.create(el.value!, {
-    value: JSON.stringify(data, null, 2),
+    value: content,
     language: 'json',
     readOnly: true,
     folding: true,

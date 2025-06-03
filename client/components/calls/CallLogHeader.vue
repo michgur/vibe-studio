@@ -7,8 +7,8 @@
 </template>
 
 <script setup lang="ts">
-import type { Contact } from '../../shared/types'
-import { fmtName } from '../fmt'
+import type { Contact } from '@shared/types'
+import { fmtName } from '@/fmt'
 
 defineProps<{ contact: Contact }>()
 </script>

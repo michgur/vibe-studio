@@ -1,5 +1,5 @@
 <template>
-  <ContactList v-if="agent" :agent="agent" style="min-width: 300px" v-model:contact="contact" />
+  <ContactList v-if="agent" :agent="agent" :dateRange="dateRange" style="min-width: 300px" v-model:contact="contact" />
   <ResizablePane :minWidth="0.2" :open="contact !== undefined">
     <div class="card" id="call-log" v-if="contact">
       <CallLogHeader :contact="contact" />
@@ -12,14 +12,14 @@
 <script setup lang="ts">
 import { watch, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { CallMetadata, Contact } from '../../shared/types'
-import CallDetails from './CallDetails.vue'
-import CallList from './CallList.vue'
-import ContactList from './ContactList.vue'
-import ResizablePane from './ResizablePane.vue'
-import CallLogHeader from './CallLogHeader.vue'
+import type { CallMetadata, Contact, DateRange } from '@shared/types'
+import CallDetails from '@/components/calls/CallDetails.vue'
+import CallList from '@/components/calls/CallList.vue'
+import ContactList from '@/components/contacts/ContactList.vue'
+import ResizablePane from '@/components/ui/ResizablePane.vue'
+import CallLogHeader from '@/components/calls/CallLogHeader.vue'
 
-const { agent } = defineProps<{ agent: string }>()
+const { agent, dateRange } = defineProps<{ agent: string, dateRange: DateRange }>()
 const contact = ref<Contact | undefined>(undefined)
 const call = ref<CallMetadata | undefined>(undefined)
 

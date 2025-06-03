@@ -1,11 +1,11 @@
 <template>
-  <ul v-if="contact.calls.length" id="call-list">
+  <ul v-if="contact.calls.length" id="call-list" @keydown.down="console.log('calls down')">
     <li v-for="(call, i) in contact.calls" :key="call.id ? call.id + '-' + call.attempt : i"
       :aria-selected="call === selectedCall" @click="selectedCall = call">
       <CallDirectionIcon :direction="call.direction" />
       <span class="ellipsize">{{ call.result || 'N/A' }}</span>
       <small>{{ fmtDate(call.dialedAt) }}</small>
-      <QuickPlay v-if="call.recordingId" :recId="call.recordingId" />
+      <PlayButton v-if="call.recordingId" :recId="call.recordingId" />
     </li>
   </ul>
   <div v-else style="padding:16px; text-align:center; color:var(--color-6)">No call attempts logged.</div>
@@ -13,10 +13,10 @@
 
 <script setup lang="ts">
 import { watch } from 'vue'
-import QuickPlay from './QuickPlay.vue'
-import type { Contact, CallMetadata } from '../../shared/types'
+import PlayButton from '@/components/recordings/PlayButton.vue'
+import type { Contact, CallMetadata } from '@shared/types'
 import CallDirectionIcon from './CallDirectionIcon.vue'
-import { fmtDate } from '../fmt'
+import { fmtDate } from '@/fmt'
 
 const props = defineProps<{
   contact: Contact

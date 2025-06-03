@@ -28,7 +28,7 @@ button[rec^=p]:hover {
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import globalAudio from '../state/globalAudio'
+import globalAudio from '@/state/globalAudio'
 
 const props = defineProps<{ recId?: string }>()
 

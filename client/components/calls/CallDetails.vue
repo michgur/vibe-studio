@@ -5,7 +5,7 @@
       :disabled="!call.duration">Transcript</button>
   </div>
 
-  <div id="call-details" ref="callDetails">
+  <div id="call-details" ref="callDetails" :class="{ skeleton: isLoading && tab === 'transcript' }">
     <template v-if="tab === 'details'">
       <table>
         <tbody>
@@ -29,14 +29,20 @@
     </template>
 
     <template v-else>
-      <div v-if="isLoading" class="skeleton"></div>
-      <p v-else-if="errorShown" style="color:red">Error: {{ errorShown }}</p>
+      <p v-if="errorShown" style="color:red">Error: {{ errorShown }}</p>
       <p v-else-if="!transcript?.length">No transcript.</p>
       <div v-else id="message-box">
-        <div v-for="(m, idx) in transcript" :key="idx" :data-speaker="m.speaker">
-          <div>{{ m.content || '[empty]' }}</div>
-          <small><strong>{{ m.speaker }}</strong> | {{ fmtTimestamp(m.timestamp) }}</small>
-        </div>
+        <template v-for="(m, idx) in transcript" :key="idx">
+          <div v-if="m.debugJSON" :aria-selected="selectedMessage === m" :data-speaker="m.speaker" data-debug
+            @click="selectedMessage = m" v-tooltip="'Click to View Debug Info'">
+            <div>{{ m.content || '[empty]' }}</div>
+            <small><strong>{{ m.speaker }}</strong> | {{ fmtTimestamp(m.timestamp) }}</small>
+          </div>
+          <div v-else :data-speaker="m.speaker">
+            <div>{{ m.content || '[empty]' }}</div>
+            <small><strong>{{ m.speaker }}</strong> | {{ fmtTimestamp(m.timestamp) }}</small>
+          </div>
+        </template>
       </div>
     </template>
   </div>
@@ -44,20 +50,31 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, useTemplateRef } from 'vue'
-import type { Contact, CallMetadata, CallMessage } from '../../shared/types'
-import { fmtKey, fmtTimestamp, fmtValue } from '../fmt';
+import type { Contact, CallMetadata, CallMessage } from '@shared/types'
+import { fmtKey, fmtTimestamp, fmtValue } from '@/fmt';
 
-const props = defineProps<{ contact: Contact, agent: string, call: CallMetadata }>()
+export type CallDetailsTab = 'details' | 'transcript'
+
+const props = defineProps<{
+  contact: Contact,
+  agent: string,
+  call: CallMetadata,
+  debug?: boolean,
+  defaultTab?: CallDetailsTab
+}>()
+const selectedMessage = defineModel<CallMessage | undefined>('message')
 
 const transcript = ref<CallMessage[] | null>(null)
 const isLoading = ref(false)
 const errorShown = ref<string | null>(null)
-const tab = ref<'details' | 'transcript'>('details')
+const tab = ref<CallDetailsTab>(props.defaultTab || 'details')
 const callDetails = useTemplateRef("callDetails")
 
 async function fetchTranscript(): Promise<CallMessage[]> {
   try {
-    const res = await fetch(`/api/${props.agent}/calls/${props.call.id}/transcript`, {
+    let url = `/api/${props.agent}/calls/${props.call.id}/transcript`
+    if (props.debug) url += '?debug'
+    const res = await fetch(url, {
       method: 'GET'
     }).then(r => r.json())
     return res;
@@ -70,7 +87,8 @@ async function fetchTranscript(): Promise<CallMessage[]> {
 watch(() => props.call, async (call) => {
   transcript.value = null
   errorShown.value = null
-  tab.value = "details"
+  selectedMessage.value = undefined
+  tab.value = props.defaultTab || 'details'
 
   if (!call?.id) return
   isLoading.value = true
@@ -125,6 +143,37 @@ watch(() => [tab.value, props.call], () => {
 
   & [data-speaker=assistant] {
     align-self: flex-start;
+
+    &[data-debug] {
+      margin: -8px;
+      padding: 8px;
+      cursor: pointer;
+      position: relative;
+
+      &:hover,
+      &[aria-selected="true"] {
+        background: var(--color-hover);
+        outline: 2px solid var(--color-10);
+
+        &::after {
+          content: "{}";
+          position: absolute;
+          right: 8px;
+          bottom: 8px;
+          font-weight: 600;
+          color: var(--color-6);
+        }
+      }
+
+      &[aria-selected="true"] {
+        background: var(--color-selected);
+
+        &::after {
+          color: var(--color-b) !important;
+          content: "{ }" !important;
+        }
+      }
+    }
   }
 }
 

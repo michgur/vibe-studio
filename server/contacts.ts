@@ -2,7 +2,7 @@ import { Router, type NextFunction, type Request, type Response } from 'express'
 import { TTLCache } from '@brokerloop/ttlcache'
 import { parseISO } from 'date-fns'
 import { oneaiRequest } from './core'
-import type { Contact, CallMetadata, CallMessage } from '../shared/types'
+import type { Contact, CallMetadata, CallMessage, DateString } from '../shared/types'
 
 const PAGE_SIZE = 25
 const TTL = 30
@@ -32,7 +32,6 @@ function parseContact(raw: any): Contact {
     .sort((a: CallMetadata, b: CallMetadata) => (+new Date(b.dialedAt!)) - (+new Date(a.dialedAt!)))
 
   return {
-    rawJsonStr: JSON.stringify(raw, null, 4),
     status: (raw.contact_state || '').replace(/_/g, ' ').replace(/\b\w/g, (l: string) => l.toUpperCase()),
     metadata: raw.metadata,
     firstName: raw.metadata.contact_name || '',
@@ -51,10 +50,16 @@ function parseContact(raw: any): Contact {
 router.get('/:agent/contacts', async (req: Request, res: Response, next: NextFunction) => {
   try {
     const { agent } = req.params
+    const { from, to } = req.query as { from?: DateString, to?: DateString }
     const page = parseInt(req.query.page as string || '1', 10)
     const status = typeof req.query.status === 'string' ? [req.query.status] : (req.query.status as string[] || [])
-    const body: any = { limit: PAGE_SIZE, page }
-    if (status.length) body.contact_state = status.join(',')
+    const body: any = {
+      limit: PAGE_SIZE,
+      page,
+      ...(from && { from_date: from }),
+      ...(to && { to_date: to }),
+      ...(status.length && { contact_state: status.join(',') }),
+    }
 
     const resp = await oneaiRequest('POST', agent, 'contacts/list', { body })
     const contacts = (resp.contacts || []).map(parseContact)
@@ -108,6 +113,8 @@ function timedeltaSeconds(ts: string, start?: number): number | undefined {
 router.get('/:agent/calls/:id/transcript', async (req, res, next) => {
   try {
     const { agent, id } = req.params
+    const { debug } = req.query
+
     const raw = await oneaiRequest('GET', agent, `chats/${id}/history`)
     let messages = raw.chat_items || []
     if (messages.length === 0 || (!messages[0].content && messages.length === 1)) {
@@ -123,6 +130,7 @@ router.get('/:agent/calls/:id/transcript', async (req, res, next) => {
       content: msg.content || '',
       speaker: msg.speaker || 'assistant',
       timestamp: timedeltaSeconds(msg.timestamp, start),
+      ...(debug !== undefined && msg.debug_info && { debugJSON: JSON.stringify(msg.debug_info, null, 2) }),
     }))
 
     res.json(transcript)

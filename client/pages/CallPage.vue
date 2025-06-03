@@ -1,8 +1,12 @@
 <template>
-  <CallLogHeader v-if="contact" :agent="agent" :contact="contact" />
+  <div class="card" style="min-width: 300px;">
+    <CallLogHeader v-if="contact" :agent="agent" :contact="contact" />
+    <CallDetails v-if="call && contact" :agent="agent" :contact="contact" :call="call" v-model:message="message"
+      :debug="true" defaultTab="transcript" />
+  </div>
   <ResizablePane :minWidth="0.2">
     <div class="card">
-      <JsonView :data="{ a: 'b' }" />
+      <JsonView :content="message?.debugJSON || '{}'" />
     </div>
   </ResizablePane>
 </template>
@@ -10,14 +14,16 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import type { CallMetadata, Contact } from '../../shared/types'
-import CallLogHeader from './CallLogHeader.vue'
-import ResizablePane from './ResizablePane.vue'
-import JsonView from './JsonView.vue'
+import { type CallMessage, type CallMetadata, type Contact } from '@shared/types'
+import CallLogHeader from '@/components/calls/CallLogHeader.vue'
+import CallDetails from '@/components/calls/CallDetails.vue'
+import ResizablePane from '@/components/ui/ResizablePane.vue'
+import JsonView from '@/components/ui/JsonView.vue'
 
 const { agent } = defineProps<{ agent: string }>()
 const contact = ref<Contact | undefined>(undefined)
 const call = ref<CallMetadata | undefined>(undefined)
+const message = ref<CallMessage | undefined>(undefined)
 
 const router = useRouter();
 const route = useRoute();
@@ -42,7 +48,6 @@ watch(() => [route.query.contact, route.query.call], async ([contactId, callId])
     }
   }
   if (callId) {
-    console.log(contact.value)
     call.value = contact.value.calls.find(c => c.id === callId)
   }
 }, { immediate: true })

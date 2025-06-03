@@ -12,7 +12,7 @@
 
     <div>
       <div>
-        <QuickPlay :recId="globalAudio.currentRecId" />
+        <PlayButton :recId="globalAudio.currentRecId" />
         <select v-tooltip="'Audio Speed'" v-model="playbackRate" @change="onRateChanged"
           :disabled="globalAudio.isLoading || !!errorShown">
           <option v-for="r in rates" :key="r" :value="r">{{ r }}x</option>
@@ -25,9 +25,9 @@
 
 <script setup lang="ts">
 import { ref, watch, nextTick, onUnmounted } from 'vue'
-import globalAudio from '../state/globalAudio'
-import QuickPlay from './QuickPlay.vue';
-import { fmtTimestamp } from '../fmt';
+import globalAudio from '@/state/globalAudio'
+import PlayButton from './PlayButton.vue';
+import { fmtTimestamp } from '@/fmt';
 
 const props = defineProps<{ agent?: string }>()
 
