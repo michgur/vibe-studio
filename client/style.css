@@ -11,6 +11,7 @@
   --color-b: #6868DC;
   --color-selected: color-mix(in oklch, var(--color-b), white 93%);
   --color-hover: color-mix(in oklch, var(--color-b), white 97%);
+  --color-focus: color-mix(in oklch, var(--color-b), white 85%);
   --shadow-sm: 0 2px 4px -1px #48486122;
   --shadow-lg: 0 10px 8px -3px #48486133;
   --color-10: #EEEEFF;
@@ -72,21 +73,22 @@ small {
   background: white;
   box-shadow: var(--shadow-lg);
   overflow: hidden;
+  outline-offset: 2px;
 
   & .card-header {
     background: var(--color-10);
     border: 1px solid var(--color-8);
+    border-top: none;
     padding: 8px;
-    margin: -1px;
-    margin-bottom: 0;
+    margin-inline: -1px;
   }
 
   & .card-footer {
     background: var(--color-10);
     border: 1px solid var(--color-8);
+    border-bottom: none;
     padding: 8px;
-    margin: -1px;
-    margin-top: 0;
+    margin-inline: -1px;
   }
 }
 

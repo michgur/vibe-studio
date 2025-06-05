@@ -18,6 +18,7 @@ import CallList from '@/components/calls/CallList.vue'
 import ContactList from '@/components/contacts/ContactList.vue'
 import ResizablePane from '@/components/ui/ResizablePane.vue'
 import CallLogHeader from '@/components/calls/CallLogHeader.vue'
+import { useDebounce } from '@vueuse/core'
 
 const { agent, dateRange } = defineProps<{ agent: string, dateRange: DateRange }>()
 const contact = ref<Contact | undefined>(undefined)
@@ -26,7 +27,7 @@ const call = ref<CallMetadata | undefined>(undefined)
 const router = useRouter();
 const route = useRoute();
 
-watch(call, () => {
+watch(useDebounce(call, 500), () => {
   const query = { ...(contact.value && { contact: contact.value?.id }), ...(call.value && { call: call.value.id }) }
   if (route.query.contact === contact.value?.id) router.replace({ query })
   else router.push({ query })

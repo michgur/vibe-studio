@@ -1,10 +1,6 @@
 <template>
-  <button :rec="isCurrent ? (globalAudio.isPlaying ? 'playing' : 'paused') : ''" :disabled="recId === undefined"
-    :title="isCurrent ? (globalAudio.isPlaying ? (globalAudio.isLoading ? 'Loading' : 'Pause') : 'Play') : 'Play Recording'"
-    v-tooltip="isCurrent ? (globalAudio.isPlaying ? (globalAudio.isLoading ? 'Loading' : 'Pause') : 'Play') : 'Play Recording'"
-    @click="clicked">
-    {{ isCurrent && globalAudio.isPlaying ? (globalAudio.isLoading ? "⏳" : "⏸︎") : "▶︎" }}
-  </button>
+  <button :rec="status" :disabled="recId === undefined" v-tooltip="tooltips[status]"
+    @click="recAudio.playOrPause(recId)">{{ icons[status] }}</button>
 </template>
 
 <style>
@@ -13,33 +9,44 @@ button[rec] {
   height: 24px;
   text-align: center;
   padding: 0;
-}
 
-button[rec^=p] {
-  background: #cdefec;
-  border: 1px solid var(--color-c);
-}
+  &[rec^=p],
+  &[rec=loading] {
+    background: #cdefec;
+    border: 1px solid var(--color-c);
 
-button[rec^=p]:hover {
-  background: #bfdfdc;
-  border-color: #2fbab5;
+    &:hover {
+      background: #bfdfdc;
+      border-color: #2fbab5;
+    }
+  }
 }
 </style>
 
 <script setup lang="ts">
 import { computed } from 'vue'
-import globalAudio from '@/state/globalAudio'
+import useRecAudio from '@/composables/recAudio';
 
-const props = defineProps<{ recId?: string }>()
+const { recId } = defineProps<{ recId?: string }>()
+const recAudio = useRecAudio()
 
-const isCurrent = computed(() => globalAudio.currentRecId === props.recId)
+const status = computed(() => {
+  if (recAudio.currentRecId !== recId) return 'idle'
+  if (recAudio.isLoading) return 'loading'
+  if (recAudio.isPlaying) return 'playing'
+  return 'paused'
+})
 
-function clicked() {
-  if (isCurrent.value) {
-    globalAudio.isPlaying = !globalAudio.isPlaying
-  } else {
-    globalAudio.currentRecId = props.recId
-    globalAudio.isPlaying = true
-  }
+const tooltips = {
+  'idle': 'Play Recording',
+  'loading': 'Loading',
+  'playing': 'Pause',
+  'paused': 'Play',
+}
+const icons = {
+  'idle': '▶︎',
+  'loading': '⏳',
+  'playing': '⏸︎',
+  'paused': '▶︎',
 }
 </script>

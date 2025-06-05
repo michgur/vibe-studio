@@ -102,11 +102,7 @@ function cancel() {
 }
 
 .trigger {
-  padding: 0.25rem 0.75rem;
-  border: 1px solid #ccc;
   background: #fff;
-  border-radius: 4px;
-  cursor: pointer;
 }
 
 .trigger:hover {

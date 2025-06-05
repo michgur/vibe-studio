@@ -68,12 +68,14 @@ watch(agent, (a) => router.push({ params: { agent: a } }))
     & a {
       appearance: none;
       text-decoration: none;
+      text-underline-offset: 2px;
       padding-top: 4px;
       color: var(--color-6);
 
       &.router-link-active,
       &:hover {
         color: var(--color-b);
+        text-decoration: underline;
       }
     }
   }
