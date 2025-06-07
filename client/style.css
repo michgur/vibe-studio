@@ -75,6 +75,11 @@ small {
   overflow: hidden;
   outline-offset: 2px;
 
+  &:focus-within {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 0;
+  }
+
   & .card-header {
     background: var(--color-10);
     border: 1px solid var(--color-8);

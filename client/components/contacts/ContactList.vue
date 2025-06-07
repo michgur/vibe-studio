@@ -10,7 +10,6 @@ import ContactRow from "./ContactRow.vue"
 const props = defineProps<{ agent: string; dateRange: DateRange }>()
 const recAudio = useRecAudio()
 
-/* filters, data, paging -------------------------------------------------- */
 const statusFilter = ref<ContactStatus[]>([])
 const contacts = ref<Contact[]>([])
 const totalContacts = ref<number | undefined>()
@@ -105,11 +104,6 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
   flex-direction: column;
   position: relative;
 
-  &:focus-within {
-    outline: 2px solid var(--color-focus);
-    outline-offset: 0;
-  }
-
   &> :last-child {
     display: flex;
     flex-direction: column;
@@ -117,11 +111,10 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
   }
 }
 
-/* side-panel toggle icon (unchanged) */
 .sidepanel-icon {
   width: 18px;
+  height: 18px;
   padding: 1px;
-  aspect-ratio: 1;
   background: var(--color-8);
   border-radius: 2px;
   cursor: pointer;

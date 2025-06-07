@@ -68,9 +68,11 @@ onUnmounted(() => {
     display: flex;
     align-items: center;
     justify-content: center;
+    pointer-events: none;
+    cursor: col-resize;
 
     &:active::after {
-      cursor: col-resize;
+      pointer-events: all;
       position: absolute;
       content: "";
       z-index: 20;
@@ -84,11 +86,15 @@ onUnmounted(() => {
       width: 4px;
       height: 80px;
       border-radius: 10px;
-      cursor: col-resize;
+      pointer-events: all;
     }
 
     &:hover::before {
-      background: var(--color-6);
+      background: var(--color-4);
+    }
+
+    &:active::before {
+      background: var(--color-b);
     }
   }
 

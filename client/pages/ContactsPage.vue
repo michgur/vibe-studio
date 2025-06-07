@@ -27,7 +27,7 @@ const call = ref<CallMetadata | undefined>(undefined)
 const router = useRouter();
 const route = useRoute();
 
-watch(useDebounce(call, 500), () => {
+watch(useDebounce(call, 200), () => {
   const query = { ...(contact.value && { contact: contact.value?.id }), ...(call.value && { call: call.value.id }) }
   if (route.query.contact === contact.value?.id) router.replace({ query })
   else router.push({ query })
@@ -71,6 +71,5 @@ watch(() => [route.query.contact, route.query.call], async ([contactId, callId])
       line-break: anywhere;
     }
   }
-
 }
 </style>

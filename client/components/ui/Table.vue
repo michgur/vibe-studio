@@ -5,7 +5,7 @@
     'sticky-col': stickyFirstColumn,
   }" tabindex="0" @scroll="onScroll" @keydown.up.prevent="selectRel(-1)" @keydown.down.prevent="selectRel(1)">
     <table>
-      <thead v-if="$slots.head">
+      <thead v-if="$slots.header">
         <tr>
           <slot name="header" />
         </tr>
@@ -53,7 +53,7 @@ function selectRel(d: number) {
 }
 
 function onScroll(e: Event) {
-  isScrolled.value = (e.target as HTMLElement).scrollLeft !== 0
+  isScrolled.value = (e.target as HTMLElement).scrollLeft >= 20
 }
 </script>
 
@@ -66,7 +66,8 @@ figure[role=table] {
   & table {
     width: 100%;
     min-width: 900px;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0;
 
     & thead th {
       padding: 12px 8px;
@@ -89,7 +90,11 @@ figure[role=table] {
 
     & tr {
       background: white;
-      border-bottom: 1px solid var(--color-10);
+
+      & td,
+      & th {
+        border-bottom: 1px solid var(--color-10);
+      }
 
       &:last-child {
         border-bottom: none;
@@ -105,11 +110,16 @@ figure[role=table] {
     }
   }
 
+  &.sticky-head,
+  &.sticky-col {
+    isolation: isolate;
+  }
+
   &.sticky-head thead {
     position: sticky;
     top: 0;
     z-index: 2;
-    box-shadow: 0 1px 0 var(--color-10), var(--shadow-sm);
+    filter: drop-shadow(0 2px 2px #48486111);
     background: white;
   }
 
@@ -119,6 +129,7 @@ figure[role=table] {
     left: 0;
     background: inherit;
     z-index: 1;
+    max-width: 10dvh;
   }
 
   &.sticky-col.scrolled th:first-child::after {

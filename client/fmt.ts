@@ -1,11 +1,20 @@
+const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+  day: "2-digit",
+  month: "short",
+  hour: "2-digit",
+  minute: "2-digit",
+  hour12: false,
+})
+
 export function fmtDate(d?: string): string {
   if (!d) return 'N/A'
-  return new Date(d).toLocaleString('en-GB', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
+
+  const parts = Object.fromEntries(
+    dateFormatter
+      .formatToParts(new Date(d))
+      .map(p => [p.type, p.value])
+  )
+  return `${parts.day} ${parts.month} ${parts.hour}:${parts.minute}`
 }
 
 export function fmtTimestamp(t?: number) {
