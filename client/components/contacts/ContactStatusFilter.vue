@@ -1,11 +1,12 @@
 <template>
   <div id="contact-status" class="card-header">
-    <label for="state-filter" style="margin-inline-end: 10px">Filter by status:</label>
-    <select id="state-filter" v-model="selectedFilterLabel">
-      <option v-for="opt in FILTER_OPTIONS" :key="opt.label" :value="opt.label">
-        {{ opt.label }}
-      </option>
-    </select>
+    <label>Status
+      <select v-model="selectedFilterLabel">
+        <option v-for="opt in FILTER_OPTIONS" :key="opt.label" :value="opt.label">
+          {{ opt.label }}
+        </option>
+      </select>
+    </label>
   </div>
 
   <div v-if="selectedFilter.status === 'custom'" id="custom-status" class="card-header">
@@ -17,18 +18,20 @@
 </template>
 
 <style>
+#contact-status label,
+#custom-status label {
+  display: flex;
+  align-items: center;
+  font-size: 0.9em;
+  cursor: pointer;
+  gap: 4px;
+}
+
 #custom-status {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   gap: 8px 10px;
   margin-bottom: 0;
-
-  & label {
-    display: flex;
-    align-items: center;
-    font-size: 0.9em;
-    cursor: pointer;
-  }
 }
 </style>
 

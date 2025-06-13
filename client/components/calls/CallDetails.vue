@@ -130,7 +130,7 @@ watch(() => [tab.value, props.call], () => {
 
   & [data-speaker=user] {
     padding: 8px;
-    background: var(--color-selected);
+    background: var(--color-active);
     align-self: flex-end;
     max-width: 75%;
 
@@ -166,7 +166,7 @@ watch(() => [tab.value, props.call], () => {
       }
 
       &[aria-selected="true"] {
-        background: var(--color-selected);
+        background: var(--color-active);
 
         &::after {
           color: var(--color-b) !important;
@@ -218,15 +218,28 @@ watch(() => [tab.value, props.call], () => {
 }
 
 [role=tab] {
-  background: none;
   border: none;
-  border-radius: 0;
+  background: none;
   font-weight: 600;
   padding: 6px 8px 6px 8px;
 
-  &[aria-selected=true] {
-    border-bottom: 2px solid var(--color-b);
-    padding-bottom: 4px;
+  &:not([disabled]) {
+    &:hover {
+      background: var(--color-hover);
+      border-bottom: 2px solid var(--color-8);
+      padding-bottom: 4px;
+    }
+
+    &:active {
+      background: var(--color-active);
+      border-bottom: 2px solid var(--color-6);
+      padding-bottom: 4px;
+    }
+
+    &[aria-selected=true] {
+      border-bottom: 2px solid var(--color-b);
+      padding-bottom: 4px;
+    }
   }
 }
 </style>

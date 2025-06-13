@@ -6,14 +6,14 @@
       <RouterLink :to="`/${agent}/reports`">Report Builder</RouterLink>
       <div style="flex-grow:1"></div>
       <DateRangePicker v-model="dateRange" />
-      <div>
-        <label for="agent-select">Agent </label>
-        <select id="agent-select" v-model="agent">
+      <label>
+        Agent
+        <select v-model="agent">
           <option v-for="id in ALL_AGENTS" :key="id" :value="id">
             {{ id }}
           </option>
         </select>
-      </div>
+      </label>
     </header>
 
     <main>
@@ -77,6 +77,12 @@ watch(agent, (a) => router.push({ params: { agent: a } }))
         color: var(--color-b);
         text-decoration: underline;
       }
+    }
+
+    & label {
+      display: flex;
+      align-items: center;
+      gap: 4px;
     }
   }
 

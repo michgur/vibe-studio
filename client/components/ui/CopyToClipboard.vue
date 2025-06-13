@@ -1,5 +1,5 @@
 <template>
-  <button class="copy-to-clipboard" v-tooltip="isCopying ? 'Copied' : 'Copy to Clipboard'" @click="onClick">📋</button>
+  <button type="button"  class="copy-to-clipboard" v-tooltip="isCopying ? 'Copied' : 'Copy to Clipboard'" @click="onClick">📋</button>
 </template>
 
 <script setup lang="ts">

@@ -5,7 +5,7 @@
     <div>
       <input type="range" :max="Math.floor(recAudio.duration)" v-model="recAudio.currentTime"
         :disabled="recAudio.isLoading || !!recAudio.error || !recAudio.duration" />
-      <button @click="recAudio.currentRecId = undefined" v-tooltip="'Close Player'">✕</button>
+      <button type="button"  @click="recAudio.currentRecId = undefined" v-tooltip="'Close Player'">✕</button>
     </div>
 
     <div>
@@ -44,7 +44,7 @@ watch(() => props.agent, (agent) => recAudio.agent = agent, { immediate: true })
   width: 90%;
   max-width: 600px;
   padding: 8px;
-  background-color: var(--color-selected);
+  background-color: var(--color-active);
   z-index: 100;
   display: flex;
   flex-direction: column;

@@ -9,7 +9,7 @@
           <tr>
             <th v-for="(h, i) in headers" :key="h.id" style="position: relative" class="ellipsize">
               <span v-tooltip="h.label">{{ h.label }}</span>
-              <button :data-sort="sortKey === i ? (sortDesc ? 'desc' : 'asc') : 'neutral'" @click="sortBy(i)"
+              <button type="button"  :data-sort="sortKey === i ? (sortDesc ? 'desc' : 'asc') : 'neutral'" @click="sortBy(i)"
                 v-tooltip="'Sort'">
                 {{ sortKey === i ? (sortDesc ? '↓' : '↑') : '⇅' }}
               </button>

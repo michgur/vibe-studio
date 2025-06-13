@@ -23,7 +23,12 @@ export function fmtTimestamp(t?: number) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
 }
 
-export function fmtKey(k: string) { return k.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()) }
+export function fmtKey(k: string) {
+  return k
+    .replace(/([a-z])([A-Z])/g, '$1 $2') // camelCase
+    .replace(/_/g, ' ') // snake_case
+    .replace(/\b\w/g, l => l.toUpperCase()) // capitalize
+}
 
 export function fmtValue(v: any) { return typeof v === 'object' ? JSON.stringify(v) : String(v) }
 

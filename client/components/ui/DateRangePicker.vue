@@ -1,7 +1,7 @@
 <template>
   <div class="drp">
     <!-- compact display button -->
-    <button class="trigger" @click="open = !open">
+    <button type="button"  class="trigger" @click="open = !open">
       {{ rangeLabel }}
     </button>
 
@@ -16,15 +16,15 @@
 
       <!-- preset shortcuts -->
       <div class="row presets">
-        <button v-for="p in presets" :key="p.label" @click="applyPreset(p.range)" class="preset-btn">
+        <button type="button"  v-for="p in presets" :key="p.label" @click="applyPreset(p.range)" class="preset-btn">
           {{ p.label }}
         </button>
       </div>
 
       <!-- action buttons -->
       <div class="row actions">
-        <button class="text-btn" @click="cancel">Cancel</button>
-        <button class="primary-btn" @click="apply">Apply</button>
+        <button type="button"  class="text-btn" @click="cancel">Cancel</button>
+        <button type="button"  class="primary-btn" @click="apply">Apply</button>
       </div>
     </div>
   </div>

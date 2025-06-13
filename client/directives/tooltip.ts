@@ -1,78 +1,97 @@
-// tooltip.ts  – robust cleanup: hides on scroll / resize / click-outside
-import type { Directive } from 'vue'
+import type { Directive } from "vue";
+import {
+  computePosition,
+  offset,
+  flip,
+  shift,
+  autoUpdate,
+} from "@floating-ui/dom";
 
-/* config */
-const GAP = 4
-const MARGIN = 4
-const FADE_MS = 100
+/* --- Config --- */
+const GAP = 4;
+const FADE_MS = 100; // A standard transition duration
 
-/* types */
-type Tip = HTMLDivElement & { _tm?: number }
-interface Host extends HTMLElement { _tip?: Tip; _txt?: string }
+/* --- Types --- */
+type Tip = HTMLDivElement & { _tm?: number };
+interface Host extends HTMLElement {
+  _tip?: Tip;
+  _txt?: string;
+}
 
-/* util */
+/* --- State Management --- */
+let activeState: { host: Host; cleanup: () => void } | null = null;
+
+/* --- Utilities --- */
 const mkTip = (t: string): Tip =>
-  Object.assign(document.createElement('div'), { className: 'tooltip', textContent: t })
+  Object.assign(document.createElement("div"), {
+    className: "tooltip",
+    textContent: t,
+  });
 
-const place = (tip: Tip, el: HTMLElement) => {
-  const h = el.getBoundingClientRect(), w = tip.getBoundingClientRect().width
-  const cx = Math.min(Math.max(h.left + h.width / 2, w / 2 + MARGIN), innerWidth - w / 2 - MARGIN)
-  tip.style.left = `${cx}px`
-  tip.style.top = `${h.top - tip.getBoundingClientRect().height - GAP}px`
-}
-
-/* one set of globals active only while a tooltip is visible */
-let activeHost: Host | null = null
-const offGlobal = () => {
-  window.removeEventListener('scroll', hideGlobal, true)
-  window.removeEventListener('resize', hideGlobal)
-  document.removeEventListener('pointerdown', hideGlobal, true)
-}
-const hideGlobal = () => activeHost && hide(activeHost)
-
+/* --- Core Functions --- */
 function show(el: Host) {
-  if (!el._txt) return
-  hideGlobal()                    // close previous
-  const tip = mkTip(el._txt)
-  el._tip = tip
-  document.body.appendChild(tip)
-  place(tip, el)
-  requestAnimationFrame(() => tip.classList.add('show'))
+  if (!el._txt) return;
+  if (activeState) hide(activeState.host, true); // Hide previous instantly
 
-  activeHost = el
-  window.addEventListener('scroll', hideGlobal, true)
-  window.addEventListener('resize', hideGlobal)
-  document.addEventListener('pointerdown', hideGlobal, true)
+  const tip = mkTip(el._txt);
+  el._tip = tip;
+  document.body.appendChild(tip);
+
+  const cleanup = autoUpdate(el, tip, () => {
+    computePosition(el, tip, {
+      placement: "top", // Correct value for top-center alignment
+      middleware: [offset(GAP), flip(), shift({ padding: 4 })],
+    }).then(({ x, y }) => {
+      Object.assign(tip.style, { left: `${x}px`, top: `${y}px` });
+    });
+  });
+
+  activeState = { host: el, cleanup };
+
+  requestAnimationFrame(() => {
+    tip.classList.add("show");
+  });
 }
 
 function hide(el: Host, instant = false) {
-  const tip = el._tip
-  if (!tip) return
-  el._tip = undefined
-  activeHost = activeHost === el ? null : activeHost
-  if (!activeHost) offGlobal()
+  const tip = el._tip;
+  if (!tip) return;
 
-  const rm = () => tip.remove()
-  if (instant) { clearTimeout(tip._tm); rm(); return }
+  if (activeState && activeState.host === el) {
+    activeState.cleanup();
+    activeState = null;
+  }
 
-  tip.classList.remove('show')
-  tip.addEventListener('transitionend', rm, { once: true })
-  tip._tm = window.setTimeout(rm, FADE_MS * 2)
+  el._tip = undefined;
+
+  const removeTooltip = () => tip.remove();
+
+  if (instant) {
+    clearTimeout(tip._tm);
+    removeTooltip();
+    return;
+  }
+
+  tip.classList.remove("show");
+  tip.addEventListener("transitionend", removeTooltip, { once: true });
+  tip._tm = window.setTimeout(removeTooltip, FADE_MS * 2); // Fallback
 }
 
-/* directive */
+/* --- Directive Definition --- */
 export const vTooltip: Directive<Host, string> = {
   mounted(el, { value }) {
-    el._txt = value
-    el.addEventListener('mouseenter', () => show(el))
-    el.addEventListener('mouseleave', () => hide(el))
-    el.addEventListener('focus', () => show(el))
-    el.addEventListener('blur', () => hide(el))
-    el.addEventListener('mousedown', () => hide(el))
+    el._txt = value;
+    el.addEventListener("mouseenter", () => show(el));
+    el.addEventListener("mouseleave", () => hide(el));
+    el.addEventListener("focus", () => show(el));
+    el.addEventListener("blur", () => hide(el));
+    el.addEventListener("mousedown", () => hide(el));
   },
   updated(el, { value }) {
-    el._txt = value
-    if (el._tip) el._tip.textContent = value
+    el._txt = value;
+    if (el._tip) el._tip.textContent = value;
   },
-  beforeUnmount(el) { hide(el, true) },
-}
+  beforeUnmount(el) {
+    hide(el, true);
+  },
+};

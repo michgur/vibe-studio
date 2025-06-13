@@ -4,7 +4,7 @@
       <h5 class="ellipsize">{{ fmtKey(props.group.name) }}</h5>
       <div v-if="props.search">
         <input type="text" v-model="searchTerm">
-        <button @click="searchTerm = ''">×</button>
+        <button type="button"  @click="searchTerm = ''">×</button>
       </div>
     </div>
     <Draggable :modelValue="filteredFields" @update:modelValue="model = $event" item-key="id" :group="props.group"
@@ -16,7 +16,7 @@
             @change="createCustomField($event.target as HTMLInputElement)">
           <span v-else>{{ element.label }}</span>
           <small class="monospace">{{ element.id || 'Custom field' }}</small>
-          <button v-if="props.fullUI" v-tooltip="'Remove field'" @click="emit('remove', element)">🗑️</button>
+          <button type="button"  v-if="props.fullUI" v-tooltip="'Remove field'" @click="emit('remove', element)">🗑️</button>
         </li>
       </template>
     </Draggable>
@@ -165,7 +165,7 @@ function createCustomField(input: HTMLInputElement) {
         }
 
         &:hover button {
-          background: var(--color-selected);
+          background: var(--color-active);
           display: block;
         }
       }

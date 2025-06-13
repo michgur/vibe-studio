@@ -122,10 +122,6 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
   right: 8px;
   top: 8px;
 
-  &:hover {
-    background: var(--color-6);
-  }
-
   &::before {
     content: '';
     display: block;
@@ -134,8 +130,20 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
     background: white;
   }
 
-  &:hover::before {
-    background: var(--color-10);
+  &:hover {
+    background: var(--color-6);
+
+    &::before {
+      background: var(--color-10);
+    }
+  }
+
+  &:active {
+    background: var(--color-4);
+
+    &::before {
+      background: var(--color-8);
+    }
   }
 }
 </style>

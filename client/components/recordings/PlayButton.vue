@@ -1,5 +1,5 @@
 <template>
-  <button :rec="status" :disabled="recId === undefined" v-tooltip="tooltips[status]"
+  <button type="button"  :rec="status" :disabled="recId === undefined" v-tooltip="tooltips[status]"
     @click="recAudio.playOrPause(recId)">{{ icons[status] }}</button>
 </template>
 
@@ -13,11 +13,10 @@ button[rec] {
   &[rec^=p],
   &[rec=loading] {
     background: #cdefec;
-    border: 1px solid var(--color-c);
+    border-color: var(--color-c);
 
     &:hover {
       background: #bfdfdc;
-      border-color: #2fbab5;
     }
   }
 }

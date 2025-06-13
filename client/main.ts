@@ -8,6 +8,7 @@ import { vTooltip } from '@/directives/tooltip'
 import ContactsPage from '@/pages/ContactsPage.vue'
 import CallPage from '@/pages/CallPage.vue'
 import ReportBuilderPage from '@/pages/ReportBuilderPage.vue'
+import TestPage from '@/pages/TestPage.vue'
 import { ALL_AGENTS } from '@shared/agents'
 
 const routes: RouteRecordRaw[] = [
@@ -21,6 +22,7 @@ const routes: RouteRecordRaw[] = [
       { path: 'contacts', component: ContactsPage },
       { path: 'calls', component: CallPage },
       { path: 'reports', component: ReportBuilderPage },
+      { path: 'test', component: TestPage },
     ]
   },
 ]

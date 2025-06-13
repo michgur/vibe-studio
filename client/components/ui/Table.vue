@@ -65,7 +65,7 @@ figure[role=table] {
 
   & table {
     width: 100%;
-    min-width: 900px;
+    min-width: 750px;
     border-collapse: separate;
     border-spacing: 0;
 
@@ -73,28 +73,16 @@ figure[role=table] {
       padding: 12px 8px;
       color: var(--color-4);
       background: white;
+      cursor: default;
     }
 
-    & th,
-    & td {
-      padding: 10px 8px;
-      font-size: 0.9em;
-      white-space: nowrap;
-      cursor: pointer;
-      text-align: center;
-
-      &:has(button) {
-        cursor: default;
-      }
-    }
-
-    & tr {
+    & thead tr {
       background: white;
+    }
 
-      & td,
-      & th {
-        border-bottom: 1px solid var(--color-10);
-      }
+    & tbody tr {
+      background: white;
+      cursor: pointer;
 
       &:last-child {
         border-bottom: none;
@@ -105,7 +93,20 @@ figure[role=table] {
       }
 
       &.selected {
-        background: var(--color-selected);
+        background: var(--color-active);
+      }
+    }
+
+    & th,
+    & td {
+      padding: 10px 8px;
+      font-size: 0.9em;
+      white-space: nowrap;
+      text-align: center;
+      border-bottom: 1px solid var(--color-10);
+
+      &:has(button) {
+        cursor: default;
       }
     }
   }

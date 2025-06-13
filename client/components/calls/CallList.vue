@@ -55,7 +55,7 @@ ul#call-list {
     }
 
     &[aria-selected=true] {
-      background: var(--color-selected);
+      background: var(--color-active);
     }
 
     &:last-child {
