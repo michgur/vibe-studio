@@ -4,7 +4,7 @@
       :aria-selected="call === selectedCall" @click="selectedCall = call">
       <CallDirectionIcon :direction="call.direction" />
       <span class="ellipsize">{{ call.result || 'N/A' }}</span>
-      <small>{{ fmtDate(call.dialedAt) }}</small>
+      <FormattedDateTime :dateTime="call.dialedAt" />
       <PlayButton v-if="call.recordingId" :recId="call.recordingId" />
     </li>
   </ul>
@@ -16,7 +16,7 @@ import { watch } from 'vue'
 import PlayButton from '@/components/recordings/PlayButton.vue'
 import type { Contact, CallMetadata } from '@shared/types'
 import CallDirectionIcon from './CallDirectionIcon.vue'
-import { fmtDate } from '@/fmt'
+import FormattedDateTime from '../ui/FormattedDateTime.vue'
 
 const props = defineProps<{
   contact: Contact

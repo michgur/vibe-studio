@@ -6,12 +6,10 @@ const dateFormatter = new Intl.DateTimeFormat("en-GB", {
   hour12: false,
 })
 
-export function fmtDate(d?: string): string {
-  if (!d) return 'N/A'
-
+export function fmtDate(date: Date): string {
   const parts = Object.fromEntries(
     dateFormatter
-      .formatToParts(new Date(d))
+      .formatToParts(date)
       .map(p => [p.type, p.value])
   )
   return `${parts.day} ${parts.month} ${parts.hour}:${parts.minute}`
