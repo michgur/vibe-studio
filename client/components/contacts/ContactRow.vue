@@ -1,6 +1,8 @@
 <template>
-  <th :title="fmtName(contact.firstName, contact.lastName)" class="ellipsize">
-    {{ fmtName(contact.firstName, contact.lastName) }}
+  <th class="ellipsize">
+    <strong v-tooltip="fmtName(contact.firstName, contact.lastName)">
+      {{ fmtName(contact.firstName, contact.lastName) }}
+    </strong>
   </th>
   <td>{{ contact.status }}</td>
   <td>{{ contact.retryCount }} / {{ contact.retryLimit }}</td>

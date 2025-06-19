@@ -1,5 +1,5 @@
 <template>
-  <ul v-if="contact.calls.length" id="call-list" @keydown.down="console.log('calls down')">
+  <ul v-if="contact.calls.length" id="call-list">
     <li v-for="(call, i) in contact.calls" :key="call.id ? call.id + '-' + call.attempt : i"
       :aria-selected="call === selectedCall" @click="selectedCall = call">
       <CallDirectionIcon :direction="call.direction" />
@@ -39,6 +39,7 @@ ul#call-list {
   list-style: none;
   padding: 0;
   margin: 0;
+  border-bottom: 1px solid var(--color-8);
 
   & li {
     padding: 8px;

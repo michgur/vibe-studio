@@ -1,33 +1,32 @@
 <template>
-  <div>
-    <Popover placement="bottom-end">
-      <template #trigger>
-        Status: <span>{{ presetIdx === undefined ? `Custom (${model.length})` : presets[presetIdx].label }}</span>
-      </template>
-      <template #popover>
-        <div>
-          <div role="tablist">
-            <button role="tab" :aria-selected="tab === 'presets'" @click="tab = 'presets'">Presets</button>
-            <button role="tab" :aria-selected="tab === 'custom'" @click="tab = 'custom'">Custom</button>
-          </div>
-          <form>
-            <fieldset v-if="tab === 'presets'">
-              <label v-for="(preset, i) in presets" :key="i">
-                <input type="radio" name="preset" :value="i" v-model="presetIdx">
-                {{ preset.label }}
-              </label>
-            </fieldset>
-            <fieldset v-else>
-              <label v-for="(state, i) in contactStates" :key="i">
-                <input type="checkbox" :value="state" v-model="model">
-                {{ fmtKey(state) }}
-              </label>
-            </fieldset>
-          </form>
+  <Popover placement="bottom-end">
+    <template #trigger>
+      Status: <span>{{ presetIdx === undefined ? `Custom (${model.length})` : presets[presetIdx].label }}</span>
+    </template>
+    <template #popover="{ close }">
+      <div>
+        <div role="tablist">
+          <button role="tab" :aria-selected="tab === 'presets'" @click="tab = 'presets'">Presets</button>
+          <button role="tab" :aria-selected="tab === 'custom'" @click="tab = 'custom'">Custom</button>
         </div>
-      </template>
-    </Popover>
-  </div>
+        <form id="contact-status">
+          <fieldset v-if="tab === 'presets'">
+            <label v-for="(preset, i) in presets" :key="i">
+              <input type="radio" name="preset" :value="i" v-model="presetIdx"
+                @change="(($event.target as HTMLInputElement)?.checked) && close()">
+              {{ preset.label }}
+            </label>
+          </fieldset>
+          <fieldset v-else>
+            <label v-for="(state, i) in contactStates" :key="i">
+              <input type="checkbox" :value="state" v-model="model">
+              {{ fmtKey(state) }}
+            </label>
+          </fieldset>
+        </form>
+      </div>
+    </template>
+  </Popover>
 </template>
 
 <script setup lang="ts">
@@ -81,11 +80,20 @@ watch(model, (status) => {
 </script>
 
 <style>
-.filter-button {
-  padding: 8px 12px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  background: white;
-  /* The cursor:pointer is now handled by the Popover's .trigger-container */
+#contact-status fieldset {
+  appearance: none;
+  border: none;
+  display: flex;
+  flex-direction: column;
+  padding: 8px;
+  gap: 8px;
+
+  & label {
+    font-size: .8em;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
 }
 </style>

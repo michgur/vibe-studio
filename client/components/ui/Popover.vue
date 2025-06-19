@@ -53,5 +53,6 @@ onKeyStroke("Escape", () => isOpen.value = false);
 <style>
 .popover {
   border-radius: 5px;
+  z-index: 20;
 }
 </style>

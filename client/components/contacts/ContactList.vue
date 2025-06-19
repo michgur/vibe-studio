@@ -2,7 +2,7 @@
 import { ref, watch } from "vue"
 import type { Contact, DateRange } from "@shared/types"
 import Pagination from "@/components/ui/Pagination.vue"
-import ContactStatusFilter, { type ContactStatus } from "./ContactStatusFilter.vue"
+import StatusFilter, { type ContactStatus } from "./StatusFilter.vue"
 import useRecAudio from "@/composables/recAudio"
 import Table from "@/components/ui/Table.vue"
 import ContactRow from "./ContactRow.vue"
@@ -62,8 +62,8 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
 
 <template>
   <section id="contact-list" class="card" tabindex="0" @keydown.enter="playSelectedRecording">
-    <div>
-      <ContactStatusFilter v-model="statusFilter" />
+    <div class="card-header">
+      <StatusFilter v-model="statusFilter" />
       <div v-if="selectedContact" class="sidepanel-icon" @click="selectedContact = undefined"
         v-tooltip="'Hide Call Log'" />
     </div>
@@ -104,6 +104,11 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
   flex-direction: column;
   position: relative;
 
+  &>.card-header {
+    display: flex;
+    justify-content: space-between;
+  }
+
   &> :last-child {
     display: flex;
     flex-direction: column;
@@ -118,9 +123,7 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
   background: var(--color-8);
   border-radius: 2px;
   cursor: pointer;
-  position: absolute;
-  right: 8px;
-  top: 8px;
+  box-shadow: var(--shadow-sm);
 
   &::before {
     content: '';
@@ -140,6 +143,7 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
 
   &:active {
     background: var(--color-4);
+    box-shadow: none;
 
     &::before {
       background: var(--color-8);

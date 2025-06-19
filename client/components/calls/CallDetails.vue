@@ -1,5 +1,5 @@
 <template>
-  <div role="tablist" style="display:flex">
+  <div role="tablist">
     <button role="tab" :aria-selected="tab === 'details'" @click="tab = 'details'">Details</button>
     <button role="tab" :aria-selected="tab === 'transcript'" @click="tab = 'transcript'"
       :disabled="!call.duration">Transcript</button>
@@ -11,7 +11,9 @@
         <tbody>
           <tr v-for="[k, v] in detailRows" :key="k">
             <th>{{ fmtKey(k) }}</th>
-            <td>{{ fmtValue(v) }}</td>
+            <td>
+              <CopyableSpan :text="fmtValue(v)" />
+            </td>
           </tr>
         </tbody>
       </table>
@@ -19,9 +21,9 @@
       <table v-if="call.metadata" class="monospace">
         <tbody>
           <tr v-for="[k, v] in Object.entries(call.metadata)" :key="k">
-            <th>{{ k }}</th>
+            <th><span v-tooltip="k" class="line-clamp">{{ k }}</span></th>
             <td>
-              <p class="line-clamp">{{ v }}</p>
+              <CopyableSpan :text="v" class="ellipsize" />
             </td>
           </tr>
         </tbody>
@@ -52,6 +54,7 @@
 import { ref, computed, watch, useTemplateRef } from 'vue'
 import type { Contact, CallMetadata, CallMessage } from '@shared/types'
 import { fmtKey, fmtTimestamp, fmtValue } from '@/fmt';
+import CopyableSpan from '../ui/CopyableSpan.vue';
 
 export type CallDetailsTab = 'details' | 'transcript'
 
@@ -181,15 +184,17 @@ watch(() => [tab.value, props.call], () => {
   overflow-y: auto;
   flex-grow: 1;
   position: relative;
-  padding: 8px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
 
+  & h4 {
+    padding-inline-start: 8px;
+  }
+
   & table {
     border-collapse: collapse;
     font-size: .9em;
-    margin-inline: -8px;
 
     & th,
     & td {
@@ -199,9 +204,9 @@ watch(() => [tab.value, props.call], () => {
       word-break: break-all;
       text-align: left;
 
-      & p {
+      & * {
         margin: 0;
-        --lines: 10;
+        /* --lines: 10; */
       }
     }
 
@@ -213,7 +218,7 @@ watch(() => [tab.value, props.call], () => {
 }
 
 [role=tablist] {
-  border-top: 1px solid var(--color-8);
+  display: flex;
   box-shadow: var(--shadow-sm), inset 0 -1px 0 var(--color-8);
 }
 
