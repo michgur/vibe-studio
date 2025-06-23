@@ -1,4 +1,5 @@
 import type { DateString } from "./types"
+import timezoneFlags from "./timezoneFlags.json"
 
 const fmt = new Intl.DateTimeFormat('en-GB', {
   day: '2-digit',
@@ -15,3 +16,7 @@ export const prevDay = (n: number) => {
 }
 export const startOfMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth(), 1)
 export const endOfMonth = (d: Date) => new Date(d.getFullYear(), d.getMonth() + 1, 0)
+
+export function getTimezoneFlag(timezone: string): string {
+  return timezone in timezoneFlags ? timezoneFlags[timezone as keyof typeof timezoneFlags] : "🌐"
+}

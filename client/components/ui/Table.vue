@@ -130,7 +130,7 @@ figure[role=table] {
     left: 0;
     background: inherit;
     z-index: 1;
-    max-width: 10dvh;
+    max-width: 12dvh;
   }
 
   &.sticky-col.scrolled th:first-child::after {

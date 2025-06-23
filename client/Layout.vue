@@ -4,16 +4,17 @@
       <img src="/assets/vibe.svg" alt="OneAI Vibe Studio">
       <RouterLink :to="`/${agent}/contacts`">Contacts</RouterLink>
       <RouterLink :to="`/${agent}/reports`">Report Builder</RouterLink>
-      <div style="flex-grow:1"></div>
-      <DateRangePicker v-model="dateRange" />
-      <label>
-        Agent
-        <select v-model="agent">
-          <option v-for="id in ALL_AGENTS" :key="id" :value="id">
-            {{ id }}
-          </option>
-        </select>
-      </label>
+      <nav>
+        <TimezoneModeToggle />
+        <label style="font-size:.9rem">
+          <span style="line-height: 1.2">🤖</span>
+          <select v-model="agent">
+            <option v-for="id in ALL_AGENTS" :key="id" :value="id">
+              {{ id }}
+            </option>
+          </select>
+        </label>
+      </nav>
     </header>
 
     <main>
@@ -28,10 +29,10 @@
 import { ref, watch } from 'vue'
 import { useRouter, useRoute, RouterLink } from 'vue-router'
 import Player from '@/components/recordings/Player.vue'
-import DateRangePicker from '@/components/ui/DateRangePicker.vue'
 import type { DateRange } from '@shared/types'
 import { prevDay, toISO } from '@shared/dates'
 import { ALL_AGENTS } from '@shared/agents'
+import TimezoneModeToggle from './components/ui/TimezoneModeToggle.vue'
 
 
 const router = useRouter()
@@ -56,10 +57,11 @@ watch(agent, (a) => router.push({ params: { agent: a } }))
     align-items: center;
     justify-content: space-between;
     padding-bottom: 10px;
-    font-size: 14px;
     gap: 18px;
     color: var(--color-6);
     font-weight: 600;
+    font-size: .9rem;
+    line-height: 1;
 
     &>img {
       height: 36px;
@@ -79,10 +81,20 @@ watch(agent, (a) => router.push({ params: { agent: a } }))
       }
     }
 
-    & label {
+    &>nav {
+      flex-grow: 1;
       display: flex;
-      align-items: center;
-      gap: 4px;
+      justify-content: end;
+      align-items: stretch;
+      gap: 8px;
+
+      & label {
+        height: 18px;
+        font-size: .8em;
+        display: flex;
+        align-items: stretch;
+        gap: 4px;
+      }
     }
   }
 

@@ -8,12 +8,11 @@ export type CallMetadata = {
   fromPhone: string
   direction: string
   recordingId?: string
-  timezone?: string
 }
 
 export type Contact = {
   id: string
-  timezone?: string
+  timezone: string
   metadata: Record<string, any>
   retryLimit: number
   retryCount: number

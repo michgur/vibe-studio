@@ -1,29 +1,18 @@
 <template>
   <div role="tablist">
-    <button role="tab" :aria-selected="tab === 'details'" @click="tab = 'details'">Details</button>
+    <button role="tab" :aria-selected="tab === 'details'" @click="tab = 'details'">Metadata</button>
     <button role="tab" :aria-selected="tab === 'transcript'" @click="tab = 'transcript'"
       :disabled="!call.duration">Transcript</button>
   </div>
 
   <div id="call-details" ref="callDetails" :class="{ skeleton: isLoading && tab === 'transcript' }">
     <template v-if="tab === 'details'">
-      <table>
-        <tbody>
-          <tr v-for="[k, v] in detailRows" :key="k">
-            <th>{{ fmtKey(k) }}</th>
-            <td>
-              <CopyableSpan :text="fmtValue(v)" />
-            </td>
-          </tr>
-        </tbody>
-      </table>
-      <h4>Result Metadata</h4>
       <table v-if="call.metadata" class="monospace">
         <tbody>
           <tr v-for="[k, v] in Object.entries(call.metadata)" :key="k">
             <th><span v-tooltip="k" class="line-clamp">{{ k }}</span></th>
             <td>
-              <CopyableSpan :text="v" class="ellipsize" />
+              <CopyableSpan :text="v" class="line-clamp" />
             </td>
           </tr>
         </tbody>
@@ -51,9 +40,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, useTemplateRef } from 'vue'
+import { ref, watch, useTemplateRef } from 'vue'
 import type { Contact, CallMetadata, CallMessage } from '@shared/types'
-import { fmtKey, fmtTimestamp, fmtValue } from '@/fmt';
+import { fmtTimestamp } from '@/fmt';
 import CopyableSpan from '../ui/CopyableSpan.vue';
 
 export type CallDetailsTab = 'details' | 'transcript'
@@ -103,8 +92,6 @@ watch(() => props.call, async (call) => {
     isLoading.value = false
   }
 }, { immediate: true })
-
-const detailRows = computed(() => Object.entries(props.call || {}).filter(([k]) => !['metadata', 'recording_url', 'attempt_num', 'chat_id', 'start_time', 'result', 'call_direction'].includes(k)))
 
 watch(() => [tab.value, props.call], () => {
   callDetails.value?.scrollTo({ top: 0, left: 0 })
@@ -206,7 +193,6 @@ watch(() => [tab.value, props.call], () => {
 
       & * {
         margin: 0;
-        /* --lines: 10; */
       }
     }
 

@@ -1,24 +1,48 @@
-const dateFormatter = new Intl.DateTimeFormat("en-GB", {
-  day: "2-digit",
-  month: "short",
-  hour: "2-digit",
-  minute: "2-digit",
-  hour12: false,
-})
+import { getTimezoneFlag } from "@shared/dates"
 
-export function fmtDate(date: Date): string {
-  const parts = Object.fromEntries(
+type DateTimeParts = Record<Intl.DateTimeFormatPartTypes, string>
+
+export function dateTimeParts(date: Date, timezone?: string): DateTimeParts {
+  const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+    weekday: "long",
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    ...(timezone && { timeZone: timezone }),
+  })
+  return Object.fromEntries(
     dateFormatter
       .formatToParts(date)
       .map(p => [p.type, p.value])
-  )
+  ) as DateTimeParts
+}
+
+export function fmtDate(date: Date, timezone?: string): string {
+  const parts = dateTimeParts(date, timezone)
   return `${parts.day} ${parts.month} ${parts.hour}:${parts.minute}`
+}
+
+export function fmtDateLong(date: Date, timezone?: string): string {
+  const parts = dateTimeParts(date, timezone)
+  let result = `${parts.weekday}, ${parts.day} ${parts.month} ${parts.hour}:${parts.minute}`
+  if (timezone) result += ` (${getTimezoneFlag(timezone)} ${timezone})`
+  return result
 }
 
 export function fmtTimestamp(t?: number) {
   if (t === undefined) return '--:--'
-  const m = Math.floor(t / 60 | 0), s = Math.floor(t % 60)
+  const m = Math.floor(t / 60), s = Math.floor(t % 60)
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`
+}
+
+export function fmtDuration(t?: number) {
+  if (t === undefined) return ''
+  const m = Math.floor(t / 60), s = Math.floor(t % 60)
+  return m > 0
+    ? `${m} minute${m > 1 ? 's' : ''}`
+    : `${s} second${s !== 1 ? 's' : ''}`
 }
 
 export function fmtKey(k: string) {

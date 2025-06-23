@@ -1,26 +1,27 @@
 <template>
-  <div id="report-table">
+  <div ref="container" id="report-table">
     <figure :class="{ skeleton: isLoading }">
-      <table v-if="headers.length" :style="{ width: tableWidth + 'px' }">
-        <colgroup>
-          <col v-for="(w, i) in colWidths" :key="i" :style="{ width: w + 'px' }" />
-        </colgroup>
+      <table v-if="headers.length"
+        :style="{ width: tableWidth + 'px', '--table-template': colWidths.map(w => `${w}px`).join(' ') }">
         <thead>
           <tr>
-            <th v-for="(h, i) in headers" :key="h.id" style="position: relative" class="ellipsize">
+            <th v-for="(h, i) in headers" :key="h.id" style="position:relative" class="ellipsize">
               <span v-tooltip="h.label">{{ h.label }}</span>
-              <button type="button"  :data-sort="sortKey === i ? (sortDesc ? 'desc' : 'asc') : 'neutral'" @click="sortBy(i)"
-                v-tooltip="'Sort'">
+              <button type="button" :data-sort="sortKey === i ? (sortDesc ? 'desc' : 'asc') : 'neutral'"
+                @click="sortBy(i)" v-tooltip="'Sort'">
                 {{ sortKey === i ? (sortDesc ? '↓' : '↑') : '⇅' }}
               </button>
-              <div v-if="i < headers.length - 1" class="col-resizer" @mousedown="startResize(i, $event)"></div>
+              <div ref="resizer" v-if="i < headers.length - 1" class="col-resizer" @mousedown="startResize(i, $event)">
+              </div>
             </th>
+            <th></th>
           </tr>
         </thead>
 
         <tbody>
           <tr v-for="(row, ri) in sortedRows" :key="ri">
             <td v-for="(val, ci) in row" :key="ci">{{ val }}</td>
+            <td></td>
           </tr>
         </tbody>
       </table>
@@ -34,9 +35,10 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch, computed, onBeforeUnmount, onMounted } from 'vue'
+import { ref, watch, computed, onBeforeUnmount, useTemplateRef } from 'vue'
 import { type DateRange, type ReportField } from '@shared/types'
 import CopyToClipboard from '@/components/ui/CopyToClipboard.vue'
+import { useElementSize } from '@vueuse/core';
 
 const props = defineProps<{ agent: string, rows: ReportField[], columns: ReportField[], dateRange: DateRange }>()
 
@@ -64,26 +66,17 @@ const sortedRows = computed(() => {
 })
 
 const colWidths = ref<number[]>([])
-const containerWidth = ref(0)
+const { width: containerWidth } = useElementSize(useTemplateRef("container"))
 const userHasResized = ref(false)
 
 function resetColWidthsEven() {
   const n = headers.value.length
   if (!n) return
   const base = containerWidth.value || 800
-  const even = Math.floor(base / n)
-  colWidths.value = Array(n).fill(even)
+  const even = Math.max(100, Math.floor(base / n))
+  colWidths.value = Array(n + 1).fill(even)
+  colWidths.value[n] = 0
 }
-
-onMounted(() => {
-  const fig = document.getElementById('report-table')
-  if (!fig) return
-  const ro = new ResizeObserver(([entry]) => {
-    containerWidth.value = entry.contentRect.width
-  })
-  ro.observe(fig)
-  onBeforeUnmount(() => ro.disconnect())
-})
 
 const tableWidth = computed(() => {
   const cols = colWidths.value.reduce((s, w) => s + w, 0)
@@ -102,7 +95,12 @@ function onMove(e: MouseEvent) {
   if (rCol == null) return
   userHasResized.value = true
   const delta = e.clientX - startX
-  colWidths.value[rCol] = Math.max(60, startW + delta)
+  const newWidth = Math.max(100, startW + delta)
+  colWidths.value[rCol] = newWidth
+  const tWidth = colWidths.value.reduce((a, b) => a + b, 0)
+  colWidths.value[colWidths.value.length - 1] = Math.max(colWidths.value[colWidths.value.length - 1] + containerWidth.value - tWidth, 0)
+  console.log(containerWidth.value, tableWidth.value)
+  console.log(colWidths.value.join(","))
 }
 function onUp() {
   rCol = null
@@ -174,10 +172,17 @@ watch(props, () => {
       height: min-content;
     }
 
+    & tr {
+      display: grid;
+      grid-template-columns: var(--table-template);
+    }
+
     & th,
     & td {
+      display: block;
       padding: 4px 8px;
-      border: 1px solid var(--color-8);
+      border: solid var(--color-8);
+      border-width: 0 0 1px 1px;
       text-align: center;
       overflow: hidden;
       text-overflow: ellipsis;
@@ -189,7 +194,8 @@ watch(props, () => {
       }
 
       &:last-child {
-        border-inline-end: none;
+        border-inline: none;
+        padding: 0;
       }
     }
 
@@ -251,8 +257,6 @@ watch(props, () => {
   }
 }
 
-
-/* drag handle */
 .col-resizer {
   position: absolute;
   right: 0;
@@ -261,5 +265,13 @@ watch(props, () => {
   height: 100%;
   cursor: col-resize;
   user-select: none;
+
+  &:active::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    cursor: col-resize;
+  }
 }
 </style>

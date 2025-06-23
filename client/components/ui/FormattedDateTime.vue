@@ -1,15 +1,15 @@
 <template>
-  <small v-if="dateTime">{{ fmtDate(typeof dateTime === 'string' ? new Date(dateTime) : dateTime) }}</small>
-  <small v-else class="missing">-</small>
+  <span v-if="renderDateTime" style="cursor:default" v-tooltip="fmtDateLong(renderDateTime, renderTimezone)">
+    {{ fmtDate(renderDateTime, renderTimezone) }}
+  </span>
+  <span v-else style="opacity:0.5">-</span>
 </template>
 
 <script setup lang="ts">
-import { fmtDate } from '@/fmt';
-const { dateTime } = defineProps<{ dateTime?: Date | string }>()
+import { useTimezoneSetting } from '@/composables/timezone';
+import { fmtDate, fmtDateLong } from '@/fmt';
+import { computed } from "vue";
+const props = defineProps<{ dateTime?: Date | string, timezone?: string }>()
+const renderDateTime = computed(() => typeof props.dateTime === 'string' ? new Date(props.dateTime) : props.dateTime)
+const { timezone: renderTimezone } = useTimezoneSetting(() => props.timezone)
 </script>
-
-<style scoped>
-.missing {
-  opacity: 0.5;
-}
-</style>

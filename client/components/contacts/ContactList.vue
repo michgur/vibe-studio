@@ -6,11 +6,13 @@ import StatusFilter, { type ContactStatus } from "./StatusFilter.vue"
 import useRecAudio from "@/composables/recAudio"
 import Table from "@/components/ui/Table.vue"
 import ContactRow from "./ContactRow.vue"
+import { useDebounce } from "@vueuse/core"
 
 const props = defineProps<{ agent: string; dateRange: DateRange }>()
 const recAudio = useRecAudio()
 
 const statusFilter = ref<ContactStatus[]>([])
+const nameFilter = ref("")
 const contacts = ref<Contact[]>([])
 const totalContacts = ref<number | undefined>()
 const totalPages = ref<number | undefined>()
@@ -36,6 +38,7 @@ async function fetchContacts() {
   q.set("from", props.dateRange[0])
   q.set("to", props.dateRange[1])
   q.set("page", currentPage.value.toString())
+  if (nameFilter.value) q.set("query", nameFilter.value)
   statusFilter.value.forEach(s => q.append("status", s))
 
   try {
@@ -54,8 +57,10 @@ async function fetchContacts() {
 
 watch(
   () => [props.agent, props.dateRange, currentPage.value, statusFilter.value],
-  fetchContacts
+  fetchContacts,
 )
+
+watch(useDebounce(nameFilter, 500), fetchContacts)
 
 const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
 </script>
@@ -64,6 +69,8 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
   <section id="contact-list" class="card" tabindex="0" @keydown.enter="playSelectedRecording">
     <div class="card-header">
       <StatusFilter v-model="statusFilter" />
+      <input type="search" v-model="nameFilter" placeholder="Search name or phone">
+      <div style="flex:1"></div>
       <div v-if="selectedContact" class="sidepanel-icon" @click="selectedContact = undefined"
         v-tooltip="'Hide Call Log'" />
     </div>
@@ -73,12 +80,14 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
     <p v-else-if="!contacts.length" style="flex-grow: 1; padding-inline: 8px">
       No contacts found.
     </p>
-    <Table v-else :items="contacts" v-model="selectedContact" :sticky-header="true" :sticky-first-column="true">
+    <Table v-else :items="contacts" v-model="selectedContact" :sticky-header="true" :sticky-first-column="true"
+      style="flex: 1">
       <template #header>
         <th>Name</th>
+        <th>Phone</th>
+        <th>Created</th>
         <th>Status</th>
         <th>Calls</th>
-        <th>Phone</th>
         <th>Next Call</th>
         <th>Last Call</th>
         <th v-tooltip="'Quick Listen'">🎧</th>
@@ -107,6 +116,7 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
   &>.card-header {
     display: flex;
     justify-content: space-between;
+    gap: 8px;
   }
 
   &> :last-child {

@@ -3,16 +3,16 @@
     <p v-if="recAudio.error" style="color: red">Error: {{ recAudio.error }}</p>
 
     <div>
-      <input type="range" :max="Math.floor(recAudio.duration)" v-model="recAudio.currentTime"
+      <input type="range" :max="Math.floor(recAudio.duration)" v-model="recAudio.currentTime" step="any"
+        :style="{ '--progress': `${recAudio.currentTime / recAudio.duration * 100 || 0}%` }"
         :disabled="recAudio.isLoading || !!recAudio.error || !recAudio.duration" />
-      <button type="button"  @click="recAudio.currentRecId = undefined" v-tooltip="'Close Player'">✕</button>
+      <button type="button" @click="recAudio.currentRecId = undefined" v-tooltip="'Close Player'">✕</button>
     </div>
 
     <div>
       <div>
         <PlayButton :recId="recAudio.currentRecId" />
-        <select v-tooltip="'Audio Speed'" v-model="recAudio.playbackRate"
-          :disabled="recAudio.isLoading || !!recAudio.error">
+        <select v-tooltip="'Audio Speed'" v-model="recAudio.playbackRate">
           <option v-for="r in rates" :key="r" :value="r">{{ r }}x</option>
         </select>
       </div>
@@ -53,6 +53,34 @@ watch(() => props.agent, (agent) => recAudio.agent = agent, { immediate: true })
   & input[type=range] {
     flex-grow: 1;
     accent-color: var(--color-b);
+    appearance: none;
+    background: transparent;
+    cursor: pointer;
+
+    &::-webkit-slider-runnable-track {
+      background: linear-gradient(to right, var(--color-b) var(--progress), var(--color-8) var(--progress));
+      height: 8px;
+      border-radius: 50px;
+    }
+
+    &::-moz-range-track {
+      background: var(--color-8);
+      height: 8px;
+      border-radius: 50px;
+    }
+
+    &::-webkit-slider-thumb {
+      appearance: none;
+      margin: 0;
+      padding: 0;
+      background: var(--color-b);
+      height: 3px;
+      width: 4px;
+    }
+
+    &::-moz-range-thumb {
+      appearance: none;
+    }
   }
 
   & select {
@@ -62,8 +90,12 @@ watch(() => props.agent, (agent) => recAudio.agent = agent, { immediate: true })
     text-align: center;
     font-weight: 600;
     background: none;
+    box-shadow: none;
     border: none;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 
     & option {
       padding: 0;

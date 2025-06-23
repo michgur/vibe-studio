@@ -2,8 +2,10 @@
   <ContactList v-if="agent" :agent="agent" :dateRange="dateRange" style="min-width: 300px" v-model:contact="contact" />
   <ResizablePane :minWidth="0.2" :open="contact !== undefined">
     <div class="card" id="call-log" v-if="contact">
-      <CallLogHeader :contact="contact" />
+      <CallLogHeader :text="`Call Log: ${fmtName(contact.firstName, contact.lastName)}`" :id="contact.id" />
       <CallList :agent="agent" :contact="contact" v-model="call" />
+      <CallLogHeader v-if="call" :text="`Call #${call.attempt} (${call.direction})`" :id="call.id"
+        style="box-shadow:none;border:none" />
       <CallDetails v-if="call" :agent="agent" :contact="contact" :call="call" />
     </div>
   </ResizablePane>
@@ -19,6 +21,7 @@ import ContactList from '@/components/contacts/ContactList.vue'
 import ResizablePane from '@/components/ui/ResizablePane.vue'
 import CallLogHeader from '@/components/calls/CallLogHeader.vue'
 import { useDebounce } from '@vueuse/core'
+import { fmtName } from '@/fmt'
 
 const { agent, dateRange } = defineProps<{ agent: string, dateRange: DateRange }>()
 const contact = ref<Contact | undefined>(undefined)
