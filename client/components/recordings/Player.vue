@@ -1,23 +1,18 @@
 <template>
   <div id="rec-player" class="card" v-show="recAudio.currentRecId">
     <p v-if="recAudio.error" style="color: red">Error: {{ recAudio.error }}</p>
-
-    <div>
-      <input type="range" :max="Math.floor(recAudio.duration)" v-model="recAudio.currentTime" step="any"
+    <template v-else>
+      <PlayButton :recId="recAudio.currentRecId" />
+      <button id="rec-playback-rate" v-tooltip="'Audio Speed'" @click="nextPlaybackRate">
+        {{ recAudio.playbackRate }}×
+      </button>
+      <input type="range" :max="recAudio.duration" v-model="recAudio.currentTime" step="any"
         :style="{ '--progress': `${recAudio.currentTime / recAudio.duration * 100 || 0}%` }"
         :disabled="recAudio.isLoading || !!recAudio.error || !recAudio.duration" />
-      <button type="button" @click="recAudio.currentRecId = undefined" v-tooltip="'Close Player'">✕</button>
-    </div>
-
-    <div>
-      <div>
-        <PlayButton :recId="recAudio.currentRecId" />
-        <select v-tooltip="'Audio Speed'" v-model="recAudio.playbackRate">
-          <option v-for="r in rates" :key="r" :value="r">{{ r }}x</option>
-        </select>
-      </div>
       <small>{{ fmtTimestamp(recAudio.currentTime) }} / {{ fmtTimestamp(recAudio.duration) }}</small>
-    </div>
+      <button id="rec-close-player" type="button" @click="recAudio.currentRecId = undefined"
+        v-tooltip="'Close Player'">✕</button>
+    </template>
   </div>
 </template>
 
@@ -33,6 +28,11 @@ const recAudio = useRecAudio()
 const rates = [1, 1.25, 1.5, 2]
 
 watch(() => props.agent, (agent) => recAudio.agent = agent, { immediate: true })
+
+function nextPlaybackRate() {
+  const idx = (rates.indexOf(recAudio.playbackRate) + 1) % rates.length
+  recAudio.playbackRate = rates[idx]
+}
 </script>
 
 <style>
@@ -46,67 +46,103 @@ watch(() => props.agent, (agent) => recAudio.agent = agent, { immediate: true })
   padding: 8px;
   background-color: var(--color-active);
   z-index: 100;
+  gap: 4px;
   display: flex;
-  flex-direction: column;
-  gap: 10px;
+  align-items: center;
 
   & input[type=range] {
     flex-grow: 1;
     accent-color: var(--color-b);
     appearance: none;
     background: transparent;
-    cursor: pointer;
 
     &::-webkit-slider-runnable-track {
       background: linear-gradient(to right, var(--color-b) var(--progress), var(--color-8) var(--progress));
-      height: 8px;
+      height: 4px;
       border-radius: 50px;
     }
 
     &::-moz-range-track {
-      background: var(--color-8);
-      height: 8px;
+      background: linear-gradient(to right, var(--color-b) var(--progress), var(--color-8) var(--progress));
+      height: 4px;
       border-radius: 50px;
     }
 
     &::-webkit-slider-thumb {
       appearance: none;
+      cursor: pointer;
       margin: 0;
       padding: 0;
       background: var(--color-b);
-      height: 3px;
+      outline: 3px solid var(--color-active);
+      height: 24px;
+      transform: translateY(-10px);
+      border-radius: 3px;
       width: 4px;
+
+      &:hover {
+        background: var(--color-6);
+      }
+
+      &:active {
+        background: var(--color-4);
+      }
+    }
+
+    &:disabled::-webkit-slider-thumb {
+      background: var(--color-8);
+      cursor: not-allowed;
     }
 
     &::-moz-range-thumb {
       appearance: none;
-    }
-  }
-
-  & select {
-    height: 24px;
-    padding: 0;
-    appearance: none;
-    text-align: center;
-    font-weight: 600;
-    background: none;
-    box-shadow: none;
-    border: none;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    & option {
+      cursor: pointer;
+      margin: 0;
       padding: 0;
+      background: var(--color-b);
+      outline: 3px solid var(--color-active);
+      height: 24px;
+      transform: translateY(-10px);
+      border-radius: 3px;
+      width: 4px;
+
+      &:hover {
+        background: var(--color-6);
+      }
+
+      &:active {
+        background: var(--color-4);
+      }
+    }
+
+    &:disabled::-moz-range-thumb {
+      background: var(--color-8);
+      cursor: not-allowed;
     }
   }
 
-  & div {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 10px;
+  & #rec-playback-rate {
+    appearance: none;
+    padding: 0;
+    width: 30px;
+    background: transparent;
+    font-weight: 600;
+  }
+
+  & #rec-close-player {
+    opacity: 0;
+    position: absolute;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    font-size: 1rem;
+    padding: 0;
+    pointer-events: none;
+  }
+
+  &:hover #rec-close-player {
+    opacity: 1;
+    pointer-events: auto;
   }
 }
 </style>

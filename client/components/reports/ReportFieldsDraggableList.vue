@@ -2,10 +2,7 @@
   <div :class="{ glow: props.glow }" :data-field-group="props.group.name">
     <div>
       <h5 class="ellipsize">{{ fmtKey(props.group.name) }}</h5>
-      <div v-if="props.search">
-        <input type="text" v-model="searchTerm">
-        <button type="button"  @click="searchTerm = ''">×</button>
-      </div>
+      <input v-if="props.search" type="search" v-model="searchTerm">
     </div>
     <Draggable :modelValue="filteredFields" @update:modelValue="model = $event" item-key="id" :group="props.group"
       tag="ul" :componentData="{ type: 'transition-group' }" :animation="200" @start="emitStart($event.item)"
@@ -16,7 +13,8 @@
             @change="createCustomField($event.target as HTMLInputElement)">
           <span v-else>{{ element.label }}</span>
           <small class="monospace">{{ element.id || 'Custom field' }}</small>
-          <button type="button"  v-if="props.fullUI" v-tooltip="'Remove field'" @click="emit('remove', element)">🗑️</button>
+          <button type="button" v-if="props.fullUI" v-tooltip="'Remove field'"
+            @click="emit('remove', element)">🗑️</button>
         </li>
       </template>
     </Draggable>
@@ -95,30 +93,8 @@ function createCustomField(input: HTMLInputElement) {
       margin: 0;
     }
 
-    & div:has(input) {
-      margin-inline-start: 8px;
-      position: relative;
-
-      &::before {
-        content: '🔎';
-        display: inline-block;
-        position: absolute;
-        left: 4px;
-        z-index: 1;
-      }
-
-      & input {
-        padding-inline: 24px;
-        height: 100%;
-        max-width: 100px;
-      }
-
-      & button {
-        position: absolute;
-        top: 4px;
-        right: 2px;
-        height: 18px;
-      }
+    & input {
+      max-width: 80px;
     }
   }
 

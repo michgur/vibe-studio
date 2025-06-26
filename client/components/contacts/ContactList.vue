@@ -68,8 +68,8 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
 <template>
   <section id="contact-list" class="card" tabindex="0" @keydown.enter="playSelectedRecording">
     <div class="card-header">
+      <input type="search" v-model="nameFilter" placeholder="Search name or phone" style="max-width:24ch;flex:1">
       <StatusFilter v-model="statusFilter" />
-      <input type="search" v-model="nameFilter" placeholder="Search name or phone">
       <div style="flex:1"></div>
       <div v-if="selectedContact" class="sidepanel-icon" @click="selectedContact = undefined"
         v-tooltip="'Hide Call Log'" />
@@ -117,9 +117,10 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
     display: flex;
     justify-content: space-between;
     gap: 8px;
+    height: 34px;
   }
 
-  &> :last-child {
+  &>.card-footer {
     display: flex;
     flex-direction: column;
     gap: 8px;
@@ -131,7 +132,7 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
   height: 18px;
   padding: 1px;
   background: var(--color-8);
-  border-radius: 2px;
+  border-radius: 3px;
   cursor: pointer;
   box-shadow: var(--shadow-sm);
 
@@ -141,6 +142,7 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
     height: 100%;
     width: 70%;
     background: white;
+    border-radius: 2px;
   }
 
   &:hover {

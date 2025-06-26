@@ -1,7 +1,7 @@
 import { TTLCache } from '@brokerloop/ttlcache'
 import { oneaiRequest } from './core'
 
-const TTL = 30
+const TTL = 120
 const cache = new TTLCache<string, any>({ ttl: TTL * 1000, max: 10000 })
 
 export async function fetchConfig(agent: string) {

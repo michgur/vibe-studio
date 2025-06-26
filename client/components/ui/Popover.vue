@@ -21,15 +21,20 @@ import {
 import type { Placement } from "@floating-ui/vue";
 import { onClickOutside, onKeyStroke } from "@vueuse/core";
 
-const props = withDefaults(defineProps<{
-  placement?: Placement;
-  offset?: number;
-  disabled?: boolean;
-}>(), {
-  placement: "bottom-start",
-  offset: 2,
-  disabled: false,
-});
+const props = defineProps({
+  placement: {
+    type: String as () => Placement,
+    default: 'bottom-start'
+  },
+  offset: {
+    type: Number,
+    default: 2
+  },
+  disabled: {
+    type: Boolean,
+    default: false
+  }
+})
 
 const isOpen = ref<boolean>(false);
 

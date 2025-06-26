@@ -15,9 +15,8 @@ function parseDateTime(raw: string, timezone: string): string {
   return fromZonedTime(raw, "UTC").toISOString()
 }
 
-function parseCallMetadata(raw: any, fallbackTimezone: string): CallMetadata {
+function parseCallMetadata(raw: any, timezone: string): CallMetadata {
   const match = raw.recording_url?.match(/\/Recordings\/([^/.]+)/)
-  const timezone = raw.timezone_name || raw.result_metadata?.timezone_name || fallbackTimezone
   return {
     id: raw.chat_id,
     dialedAt: parseDateTime(raw.start_time, timezone),
@@ -28,7 +27,6 @@ function parseCallMetadata(raw: any, fallbackTimezone: string): CallMetadata {
     fromPhone: raw.from_number,
     attempt: raw.attempt_num || 0,
     recordingId: (match && match[1]) || undefined,
-    timezone,
   }
 }
 

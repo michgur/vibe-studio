@@ -12,7 +12,7 @@
           <tr v-for="[k, v] in Object.entries(call.metadata)" :key="k">
             <th><span v-tooltip="k" class="line-clamp">{{ k }}</span></th>
             <td>
-              <CopyableSpan :text="v" class="line-clamp" />
+              <CopyableSpan :text="v.toString()" class="line-clamp" />
             </td>
           </tr>
         </tbody>

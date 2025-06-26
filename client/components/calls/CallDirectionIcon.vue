@@ -24,6 +24,7 @@
     height: .9em;
     width: .9em;
     fill: currentColor;
+    overflow: visible;
   }
 }
 </style>

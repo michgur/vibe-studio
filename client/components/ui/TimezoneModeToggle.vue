@@ -14,9 +14,8 @@
   </label>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { useTimezoneSetting, overrideWithBrowserTimezone } from '@/composables/timezone';
-import { getTimezoneFlag } from '@shared/dates';
 const { timezone, flag } = useTimezoneSetting()
 </script>
 
@@ -48,6 +47,8 @@ const { timezone, flag } = useTimezoneSetting()
     & div {
       padding-inline: 4px;
       user-select: none;
+      display: flex;
+      align-items: center;
     }
 
     & input:checked~[name=browser],

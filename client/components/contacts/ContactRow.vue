@@ -11,7 +11,7 @@
     </small>
   </td>
   <td>
-    <StatusChip :status="contact.status" />
+    <StatusChip :rgbMap="STATUS_RGB" :status="contact.status" />
   </td>
   <td>
     <CallCounter :limit="contact.retryLimit" :count="contact.retryCount" />
@@ -39,11 +39,26 @@ import { type Contact } from "@shared/types"
 import { fmtName } from '@/fmt'
 import CallDirectionIcon from "@/components/calls/CallDirectionIcon.vue"
 import PlayButton from "@/components/recordings/PlayButton.vue"
-import FormattedDateTime from "../ui/FormattedDateTime.vue";
-import StatusChip from "./StatusChip.vue";
+import FormattedDateTime from "@/components/ui/FormattedDateTime.vue";
+import StatusChip, { type StatusRGB } from "@/components/ui/StatusChip.vue";
 import CallCounter from "./CallCounter.vue";
 
 defineProps<{ contact: Contact }>()
 
 const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
+
+const STATUS_RGB = {
+  New: [99, 102, 241],
+  Paused: [165, 180, 252],
+  Unanswered: [245, 158, 11],
+  Unreachable: [249, 115, 22],
+  Connecting: [56, 189, 248],
+  Answered: [186, 155, 89],
+  'Contact Verified': [20, 184, 166],
+  Disqualified: [239, 68, 68],
+  Qualified: [59, 130, 246],
+  Converted: [34, 197, 94],
+  'Dont Call': [100, 116, 139],
+  'Dnc Blocked': [127, 29, 29],
+} as StatusRGB
 </script>
