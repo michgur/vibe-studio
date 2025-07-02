@@ -1,7 +1,7 @@
 <template>
   <Popover placement="bottom-end">
     <template #trigger>
-      Status: <span>{{ presetIdx === undefined ? `Custom (${model.length})` : presets[presetIdx].label }}</span>
+      {{ presetIdx === undefined ? `Custom (${model.length})` : presets[presetIdx].label }}
     </template>
     <template #popover="{ close }">
       <div>

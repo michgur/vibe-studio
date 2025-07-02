@@ -63,7 +63,7 @@ watch(agent, (a) => router.push({ params: { agent: a } }))
 
   &>header {
     display: flex;
-    align-items: center;
+    align-items: end;
     justify-content: space-between;
     padding-bottom: 10px;
     color: var(--color-6);

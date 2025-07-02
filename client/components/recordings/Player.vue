@@ -102,7 +102,7 @@ function nextPlaybackRate() {
       background: var(--color-b);
       outline: 3px solid var(--color-active);
       height: 24px;
-      transform: translateY(-10px);
+      /*transform: translateY(-10px);*/
       border-radius: 3px;
       width: 4px;
 

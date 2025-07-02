@@ -64,6 +64,7 @@ router.get('/:agent/contacts', async (req: Request, res: Response, next: NextFun
     const status = typeof req.query.status === 'string' ? [req.query.status] : (req.query.status as string[] || [])
     const body: any = {
       limit: PAGE_SIZE,
+      sort: { last_call_time: 'DESC' },
       page,
       ...(from && { from_date: from }),
       ...(to && { to_date: to }),
