@@ -4,7 +4,7 @@
       {{ fmtName(contact.firstName, contact.lastName) }}
     </strong>
   </th>
-  <td class="monospace">{{ contact.phone }}</td>
+  <td><span class="monospace">{{ contact.phone }}</span></td>
   <td>
     <small>
       <FormattedDateTime :date-time="contact.queuedAt" :timezone="contact.timezone" />

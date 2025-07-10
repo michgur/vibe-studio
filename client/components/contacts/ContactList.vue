@@ -69,6 +69,7 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
   <section id="contact-list" class="card" tabindex="0" @keydown.enter="playSelectedRecording">
     <div class="card-header">
       <input type="search" v-model="nameFilter" placeholder="Search name or phone" style="max-width:24ch;flex:1">
+      <StatusFilter v-model="statusFilter" />
       <div style="flex:1"></div>
       <div v-if="selectedContact" class="sidepanel-icon" @click="selectedContact = undefined"
         v-tooltip="'Hide Call Log'" />
@@ -85,9 +86,7 @@ const lastRecId = (c: Contact) => c.calls.find(a => a.recordingId)?.recordingId
         <th>Name</th>
         <th>Phone</th>
         <th>Created</th>
-        <th style="display: flex; flex-direction: column;">Status
-          <StatusFilter v-model="statusFilter" />
-        </th>
+        <th style="display: flex; flex-direction: column;">Status</th>
         <th>Calls</th>
         <th>Next Call</th>
         <th>Last Call</th>

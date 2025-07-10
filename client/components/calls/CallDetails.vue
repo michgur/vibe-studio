@@ -7,10 +7,10 @@
 
   <div id="call-details" ref="callDetails" :class="{ skeleton: isLoading && tab === 'transcript' }">
     <template v-if="tab === 'details'">
-      <table v-if="call.metadata" class="monospace">
+      <table v-if="call.metadata">
         <tbody>
           <tr v-for="[k, v] in Object.entries(call.metadata)" :key="k">
-            <th><span v-tooltip="k" class="line-clamp">{{ k }}</span></th>
+            <th><span v-tooltip="k" class="monospace line-clamp">{{ k }}</span></th>
             <td>
               <CopyableSpan :text="v.toString()" class="line-clamp" />
             </td>
